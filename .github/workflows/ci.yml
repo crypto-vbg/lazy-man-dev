@@ -1,0 +1,37 @@
+name: ci
+
+# The pack preaches "never do by hand what a check can do." This runs that
+# check on itself: a fresh project install, the doctor, and the eval validator,
+# on every push and PR, across the Node versions the engines field allows.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ready:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [14, 20, 22]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # A real install into the repo, without touching ~/.claude or wiring a
+      # hook into a machine that has no Claude Code. --project keeps it local.
+      - name: install (project scope, no hook)
+        run: node install.js --project --no-hook
+
+      # gh is unauthenticated on a runner, so this warns rather than fails —
+      # exactly the degraded-but-ready path the doctor is built to report.
+      - name: doctor
+        run: node doctor.js --project
+
+      - name: validate evals
+        run: node evals/run.js

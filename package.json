@@ -11,6 +11,8 @@
   },
   "scripts": {
     "setup": "node install.js",
-    "doctor": "node doctor.js"
+    "doctor": "node doctor.js",
+    "eval": "node evals/run.js",
+    "metrics": "node metrics.js"
   }
 }

@@ -1,11 +1,16 @@
 # Evals
 
-`scenarios.json` is the source of truth for whether foreman works. Fourteen
+`scenarios.json` is the source of truth for whether foreman works. Seventeen
 scenarios, each naming what should happen and the single behaviour that means
 it failed.
 
-There is no built-in runner — Anthropic's eval format is a rubric, not a test
-harness. Run them by hand:
+Anthropic's eval format is a rubric, not a test harness, so **behaviour is
+scored by hand** — whether foreman routes a query right is a model judgement, not
+an assertion. `node evals/run.js` (or `npm run eval`) checks only the structural
+floor beneath the rubric: that the JSON is well-formed, every scenario is
+complete, ids are unique, every skill a scenario names exists on disk, and which
+installed skills no scenario covers. CI gates on it. It does **not** score
+behaviour — that is still the by-hand pass below:
 
 1. Open a fresh session in a real project (not this folder — routing decisions
    depend on there being a codebase to census).
