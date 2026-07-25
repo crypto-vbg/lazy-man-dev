@@ -21,7 +21,7 @@ const settingsPath = path.join(claudeDir, 'settings.json');
 
 let fails = 0, warns = 0;
 const line = (flag, msg, fix) => {
-  const tag = { ok: '[ ok ]', warn: '[warn]', fail: '[FAIL]' }[flag];
+  const tag = { ok: '[ ok ]', warn: '[warn]', fail: '[FAIL]', info: '[info]' }[flag];
   console.log(`${tag} ${msg}`);
   if (fix && flag !== 'ok') console.log(`       → ${fix}`);
   if (flag === 'fail') fails++;
@@ -158,6 +158,13 @@ if (!has('gh', ['--version'])) {
 } else {
   line('ok', 'gh authenticated');
 }
+
+// --- 7. Optional integrations are optional ----------------------------------
+// Not a check. It exists because the routes table reads like a dependency list
+// and people install five packs they never needed.
+line('info', 'nothing else to install — every route runs on these five skills alone');
+console.log('       mattpocock/skills and ponytail are optional; foreman detects');
+console.log('       them at runtime and delegates only if they are already there.');
 
 // --- Verdict ----------------------------------------------------------------
 console.log();

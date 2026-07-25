@@ -35,16 +35,20 @@ on the **Build** route with a fresh context.
 **Judge and Learn write nothing.** They report. If the report makes the fix
 obvious, offer it — don't apply it unasked.
 
-## Composing with other packs
+## Optional: composing with other packs
 
-Self-contained by design: every route runs on this pack alone, so a missing
-skill degrades a phase rather than breaking it.
+**Nothing below is a dependency.** Every route runs to completion on this pack
+alone — that is the design, not a fallback. The skills named here are ones
+*some* users happen to have; where one is present it does a phase more richly,
+and where it is absent the phase runs inline exactly as specified above. A
+missing skill costs nothing and is never worth reporting.
 
-Your available-skills list already names what is installed on this machine —
-read it, don't probe for it. Where a listed skill covers a phase more richly
-than this pack does, delegate that phase to it:
+Your available-skills list already names what is installed on this machine.
+Read it — do not probe the filesystem, and **never invoke a name to find out
+whether it exists.** A name absent from that list does not exist: run the phase
+inline instead.
 
-| Phase | Delegate to, when installed |
+| Phase | Runs inline by default; delegate only if this is already installed |
 |---|---|
 | Foggy interview | `grilling`, `grill-with-docs` |
 | Foggy → spec → tickets | `to-spec`, `to-tickets`, `wayfinder` for multi-session fog |

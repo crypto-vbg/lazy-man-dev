@@ -16,6 +16,12 @@ node lazy-man-dev/install.js
 That links five skills, wires the sub-agent hook, and runs the doctor. If it
 says `READY — full capacity`, you are done.
 
+**That is the entire install.** There is no second pack to fetch. The skills
+named in `routes.md` — `grilling`, `implement`, `ponytail`, and the rest — are
+*optional* enrichments that a few users already have; foreman spots them at
+runtime and hands a phase over. Install none of them and every route still runs
+end to end.
+
 ## Why it exists
 
 Two excellent packs solve orthogonal halves of the problem, and neither is much
