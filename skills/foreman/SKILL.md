@@ -69,15 +69,23 @@ bloat this pack exists to prevent, so route honestly.
 
 ## Phase 2 — Recon
 
-Two questions, answered before anything is designed: **what already exists**,
-and **what does this actually touch**.
+Recon looks two ways. **Inward**: what does this codebase already have.
+**Outward**: what does the world already have, when the job needs something the
+codebase cannot explain.
 
 Dispatch the **census** as a sub-agent — use the `reuse-census` skill, or the
 `Explore` agent carrying that skill's brief. It is read-heavy work whose value
 is a short answer, so it belongs in someone else's context, not yours.
 
-Run it in parallel with your own trace of the call path the change touches:
-entry point → the function you will edit → **every caller of it**. The callers
+**Also dispatch `researching`** when the job turns on a concept, protocol,
+library, or API that is new *here* — nothing in the census resembles it, or the
+user has named a goal without the vocabulary to specify it. That combination —
+no local evidence and no user who can correct you — is exactly where a
+confident wrong answer comes from, so it is the one case that must be sourced
+rather than recalled. Both sub-agents run in parallel, in one message.
+
+Run them alongside your own trace of the call path the change touches: entry
+point → the function you will edit → **every caller of it**. The callers
 matter; the ladder's root-cause rule is decided here.
 
 The census comes back as evidence, not opinion:
@@ -88,7 +96,9 @@ The census comes back as evidence, not opinion:
 
 *Done when:* every part of the job maps to a reuse, an extension, or an
 explicit "nothing exists". A census that returns no file paths has not run —
-send it back.
+send it back. Where `researching` ran, it has named a version, a
+recommendation, and its unknowns; an unknown left unstated is worse than the
+research not running.
 
 ## Phase 3 — Budget
 

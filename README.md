@@ -13,7 +13,7 @@ git clone https://github.com/crypto-vbg/lazy-man-dev.git
 node lazy-man-dev/install.js
 ```
 
-That links five skills, wires the sub-agent hook, and runs the doctor. If it
+That links six skills, wires the sub-agent hook, and runs the doctor. If it
 says `READY — full capacity`, you are done.
 
 **That is the entire install.** There is no second pack to fetch. The skills
@@ -50,7 +50,7 @@ delegates to them when they are.
 ```
 lazy-man-dev/
 ├── install.js                     one command: link, wire, verify
-├── doctor.js                      is it ready? 14 checks, actionable failures
+├── doctor.js                      is it ready? every failure names its fix
 ├── skills/
 │   ├── foreman/
 │   │   ├── SKILL.md               the orchestrator: 6 phases
@@ -58,19 +58,20 @@ lazy-man-dev/
 │   │       ├── routes.md          6 routes → which phases run
 │   │       ├── ladder.md          the constraint (also what the hook injects)
 │   │       └── memory.md          .foreman/memory.md format + conflict rules
-│   ├── reuse-census/SKILL.md      pre-code inventory of what already exists
+│   ├── reuse-census/SKILL.md      looks INWARD: what this repo already has
+│   ├── researching/SKILL.md       looks OUTWARD: primary sources, version-pinned
 │   ├── lean-review/SKILL.md       parallel Correct ∥ Lean review
 │   ├── verifying-work/SKILL.md    evidence gate on any completion claim
 │   └── shipping/SKILL.md          issue → branch → commit → PR. YOU type this
 ├── evals/
-│   ├── scenarios.json             14 scenarios: routing + guardrails
+│   ├── scenarios.json             16 scenarios: routing + guardrails
 │   └── README.md                  how to run and score them
 └── hooks/
     ├── foreman-subagent.js        injects the ladder into every sub-agent
     └── settings-snippet.json      manual wiring, if you skip the installer
 ```
 
-Four skills are model-invoked, so `foreman` reaches them and you can also call
+Five skills are model-invoked, so `foreman` reaches them and you can also call
 them by hand. **`shipping` is not** — it sets `disable-model-invocation: true`,
 which is what makes the git guardrail structural rather than a promise. No
 skill can reach it. Only you can.
@@ -118,7 +119,7 @@ git clone https://github.com/crypto-vbg/lazy-man-dev.git
 node lazy-man-dev/install.js
 ```
 
-Node 14+ is the only prerequisite. The installer links the five skills into
+Node 14+ is the only prerequisite. The installer links the six skills into
 `~/.claude/skills/`, wires the `SubagentStart` hook into `~/.claude/settings.json`
 (backing it up first, and preserving every key already there), then runs the
 doctor and prints a verdict.
@@ -151,7 +152,7 @@ Mode; if the OS still refuses, it falls back to a copy and says so.
 node doctor.js          # add --project if you installed there
 ```
 
-Fourteen checks, three verdicts, exit 1 on any failure:
+Three verdicts, exit 1 on any failure:
 
 ```
 READY — full capacity.
@@ -161,7 +162,7 @@ NOT READY — 2 blocking issues.
 
 Every non-ok line prints the command that fixes it. What it actually verifies:
 
-- Each of the five skills is present, parses, and its frontmatter `name`
+- Each of the six skills is present, parses, and its frontmatter `name`
   matches its directory — a mismatch silently breaks discovery.
 - **`shipping` still declares `disable-model-invocation: true`.** This is the
   git guardrail checked *structurally* rather than trusted. If it ever reads
@@ -186,6 +187,7 @@ Route: Build — new endpoint, fits one session.
 Invoke a piece directly when that is all you want:
 
 - `/reuse-census` — "does this repo already do X?"
+- `/researching` — "what even *is* X, and which version applies here?"
 - `/lean-review` — review a diff, or audit the tree for bloat
 - `/verifying-work` — "did that actually work?" on any claim, yours or an agent's
 - `/shipping` — the finished work becomes an issue, a branch, a commit, and a
@@ -210,7 +212,7 @@ pack exists to prevent.
 
 ### Check it still behaves
 
-`evals/scenarios.json` holds fourteen scenarios: one per route, plus the three
+`evals/scenarios.json` holds sixteen scenarios: one per route, plus the three
 failure modes that matter most — committing when it must not, over-routing a
 trivial change, and letting an unverified claim through. Run them by hand after
 any edit to a skill; see `evals/README.md`.
@@ -287,6 +289,64 @@ Uncommitted, in the working tree. Next step is yours: /shipping
 ```
 
 **It stops there.** Nothing is committed. That last line is the handoff.
+
+### When you know the goal but not the concept
+
+The hardest case: you can describe the outcome, but not the thing that gets you
+there.
+
+> I want people to log into my site with their Google account. I don't really
+> know how any of that works.
+
+An interview here would be useless — "which OAuth flow do you want?" is not
+answerable by someone who has never met OAuth. So Recon turns **outward**
+first:
+
+```
+Route: Foggy — unfamiliar, not undecided. Researching before interviewing.
+```
+
+```
+goal:     let users sign in with an existing Google account
+version:  next-auth@4.24.5 (from package-lock.json — NOT v5, the docs differ)
+
+concept:  Google confirms who someone is, and hands your site a signed token
+          saying so. You never see their password. Your site's only job is to
+          check that token and remember the result.
+
+options:
+  1. next-auth Google provider — the library already in this project.
+     fits because it is installed and handles the token exchange; costs one
+     config block and two environment variables.
+  2. Google Identity Services directly — no library.
+     fits if you want zero dependencies; costs writing the token verification
+     yourself, which is security-critical code.
+  3. A hosted provider (Auth0, Clerk) — replaces next-auth.
+     fits if you will add more providers later; costs a paid tier and a migration.
+
+recommend: option 1.
+because:   next-auth@4.24.5 is already a dependency here and already wired for
+           sessions in src/app/api/auth/[...nextauth]/route.ts.
+
+unknowns: whether you have a Google Cloud project — that is yours to create,
+          and no source can answer it.
+sources:  node_modules/next-auth/providers/google.d.ts;
+          https://next-auth.js.org/v4/providers/google
+```
+
+Only **then** does it interview you — and each question is now phrased as a
+consequence you can actually judge:
+
+```
+Should someone stay signed in after closing the browser, or sign in again
+each visit?
+Recommend: stay signed in (30 days) — it is the norm for portfolio sites and
+is one setting either way.
+```
+
+Two things worth noticing. It read `package-lock.json` **before** the docs, so
+it is describing v4 rather than the v5 that a search would surface. And the
+unknown is listed as an unknown — no invented config key, no remembered API.
 
 ### Shipping it
 

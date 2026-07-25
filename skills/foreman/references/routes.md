@@ -11,7 +11,7 @@ exists to prevent.
 | **Broken** | Something throws, fails, regressed, flakes, or runs slow. | 1–6, with the **red loop** first | Yes |
 | **Foggy** | Too big or too vague for one session: greenfield, "should we…", a rewrite, a request with unsettled decisions inside it. | 1–3, then stop | **No** |
 | **Judge** | "Review this", "is this over-engineered", "audit the repo", "what can we delete". | 5 only | **No** |
-| **Learn** | "How does X work", "where does Y live", "what calls Z". | 2 only | **No** |
+| **Learn** | "How does X work", "where does Y live", "what calls Z" — and "what even *is* X", when the concept is new to the user. | 2 only | **No** |
 
 ## Route rules
 
@@ -31,6 +31,18 @@ or a set of tickets. Interview one question at a time and recommend an answer
 for each — a wall of questions is unanswerable. Look up every *fact* yourself;
 only the *decisions* go to the user. When the fog clears, re-enter at phase 1
 on the **Build** route with a fresh context.
+
+**Research before you interview.** Two kinds of fog look identical at first and
+need opposite moves. *Undecided* fog — the user knows the domain and has not
+chosen — is settled by interview. *Unfamiliar* fog — the user knows the end
+goal but not the concept, the protocol, or the library — cannot be. Asking
+someone to choose between OAuth flows they have never heard of extracts a guess
+and dresses it as a decision.
+
+Tell them apart by trying to phrase the first question. If answering it
+requires vocabulary the user has not used, that is unfamiliar fog: run
+`researching` first, then put each decision back in terms of its
+**consequence** rather than its mechanism. Only then interview.
 
 **Judge and Learn write nothing.** They report. If the report makes the fix
 obvious, offer it — don't apply it unasked.

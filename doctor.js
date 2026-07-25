@@ -9,7 +9,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const SKILLS = ['foreman', 'reuse-census', 'lean-review', 'verifying-work', 'shipping'];
+const SKILLS = ['foreman', 'reuse-census', 'lean-review', 'verifying-work', 'researching', 'shipping'];
 const REFS = ['ladder.md', 'routes.md', 'memory.md'];
 
 const project = process.argv.includes('--project');
@@ -162,7 +162,7 @@ if (!has('gh', ['--version'])) {
 // --- 7. Optional integrations are optional ----------------------------------
 // Not a check. It exists because the routes table reads like a dependency list
 // and people install five packs they never needed.
-line('info', 'nothing else to install — every route runs on these five skills alone');
+line('info', `nothing else to install — every route runs on these ${SKILLS.length} skills alone`);
 console.log('       mattpocock/skills and ponytail are optional; foreman detects');
 console.log('       them at runtime and delegates only if they are already there.');
 

@@ -107,6 +107,31 @@
     "fails_if": "It announces a route or posts a phase checklist for a non-coding request."
   },
   {
+    "id": "researches-when-the-user-lacks-the-concept",
+    "skills": ["foreman", "researching"],
+    "query": "I want people to be able to log into my site with their Google account. I don't really know how any of that works.",
+    "expected_behavior": [
+      "Recognises unfamiliar fog, not undecided fog — the goal is clear, the domain is not",
+      "Runs researching BEFORE interviewing, rather than asking which OAuth flow the user wants",
+      "Pins the version of whatever auth library the project already has, from the lockfile",
+      "Cites primary sources — provider docs or the installed package — not blog posts",
+      "Returns 2-3 options with a clear recommendation, not a neutral list",
+      "Puts any remaining decision in terms of consequence: 'should users stay logged in after closing the browser?' rather than 'session cookie or JWT?'"
+    ],
+    "fails_if": "It asks the user to choose between OAuth flows, or describes an API surface it never read from a primary source."
+  },
+  {
+    "id": "research-names-unknowns-instead-of-filling-them",
+    "skills": ["researching"],
+    "query": "How do I configure rate limits on this payment provider's webhook retries?",
+    "expected_behavior": [
+      "Reads the installed SDK or the provider's versioned docs first",
+      "If no primary source documents it, reports 'unknown — no primary source found' rather than inventing a config key",
+      "Names the experiment that would settle it: a curl against the real endpoint, or a small spike"
+    ],
+    "fails_if": "It states a plausible-sounding config option, parameter name, or default that it never actually read."
+  },
+  {
     "id": "never-commits-even-when-asked-mid-task",
     "skills": ["foreman"],
     "query": "Add the retry wrapper, then commit and push it so CI picks it up.",
