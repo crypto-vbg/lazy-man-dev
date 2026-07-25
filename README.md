@@ -203,6 +203,156 @@ failure modes that matter most — committing when it must not, over-routing a
 trivial change, and letting an unverified claim through. Run them by hand after
 any edit to a skill; see `evals/README.md`.
 
+## Walkthrough
+
+### Building something
+
+You type a normal request. No slash command:
+
+> Add an endpoint that exports a user's orders as CSV.
+
+**Phase 1 — it names the route and posts a checklist.** You always know which
+path it took and why:
+
+```
+Route: Build — new endpoint, fits one session.
+- [ ] 2 Recon    — census returns file:symbol evidence
+- [ ] 3 Budget   — files, lines, rung, check declared
+- [ ] 4 Build    — change works, project checks green
+- [ ] 5 Gate     — verified, reviewed, measured against budget
+- [ ] 6 Ledger   — defer: markers harvested
+```
+
+**Phase 2 — a sub-agent inventories what already exists**, before a line is
+written. This is the phase that stops the duplicate:
+
+```
+reuse — src/lib/csv.ts:writeRows covers CSV encoding, as-is.
+reuse — src/db/orders.ts:listByUser covers the query, as-is.
+none  — the route handler itself. Build it.
+house style: routes return Result<T>, never throw. src/api/invoices.ts is the model.
+```
+
+**Phase 3 — the budget, posted before any code.** This is the commitment
+phase 5 measures against:
+
+```
+Route:   Build
+Reuse:   src/lib/csv.ts:writeRows, src/db/orders.ts:listByUser
+Build:   the route handler
+Rung:    2 (reuse) — nothing above it applies; both halves already exist
+Budget:  2 files, ~40 net lines
+Check:   pytest -q tests/test_export.py
+Skipped: streaming for large exports, add when a user exceeds ~10k orders
+Excess:  none
+```
+
+**Phase 4 builds it. Phase 5 gates it** — first a real command, then two
+review sub-agents in parallel:
+
+```
+claim:    the CSV export endpoint works
+command:  pytest -q tests/test_export.py
+exit:     0
+evidence: 3 passed in 0.41s
+
+## Correct
+No findings.
+
+## Lean
+L18: shrink: manual header row build. writeRows takes a `header` arg. -4 lines.
+net: -4 lines possible.
+```
+
+It applies that finding, then signs off with numbers rather than a tour:
+
+```
+2 files, +37/-4 lines (budget: ~40). Reused: src/lib/csv.ts:writeRows.
+verified: pytest -q tests/test_export.py → exit 0.
+skipped: streaming, add when a user exceeds ~10k orders.
+
+Uncommitted, in the working tree. Next step is yours: /shipping
+```
+
+**It stops there.** Nothing is committed. That last line is the handoff.
+
+### Shipping it
+
+Now you type the command. This is the only way git history ever changes:
+
+```
+/shipping
+```
+
+**Preflight** reads `.foreman/memory.md` and checks the change set, that the
+checks passed in this session, and that no secrets are in the diff. Then it
+posts **one** block and waits for **one** yes:
+
+```
+issue:   Export user orders as CSV
+         Users need their order history in a spreadsheet. Adds
+         GET /users/:id/orders.csv, reusing the existing CSV writer.
+base:    main                       [from Standing]
+branch:  42-csv-export
+commit:  feat(api): export user orders as CSV
+files:   2 files, +37/-4
+pr:      Export user orders as CSV — Closes #42
+
+Ship this? (y/n)
+```
+
+Say yes, and it runs the sequence unattended — no further questions:
+
+```
+✓ issue #42 created
+✓ branch 42-csv-export
+✓ committed feat(api): export user orders as CSV
+✓ pushed
+✓ PR #43 → main
+
+https://github.com/you/repo/pull/43
+Review and merge when ready — shipping does not merge.
+```
+
+Note `base: main [from Standing]`. It did not ask, because a previous run
+already settled it. That is the memory doing its job.
+
+### When memory disagrees with you
+
+Ask for something that contradicts what memory holds, and it stops instead of
+guessing:
+
+```
+/shipping — put this PR up against staging
+```
+
+```
+Memory has base: main; you asked for staging. `git branch -r` shows
+origin/staging exists and is 12 commits behind main.
+
+Is staging the new default for PRs, or a one-off for this change?
+Recommend: one-off — main is still where releases cut from.
+```
+
+One question, with a recommendation, then it waits. Answer "one-off" and
+`Standing.base` stays `main`. Answer "new default" and it rewrites the field so
+you are never asked again. Facts it looks up itself — whether `staging` exists
+is not your problem to answer.
+
+### When it should not ceremony
+
+```
+Fix the typo in the login button — 'Sgin in' should be 'Sign in'.
+```
+
+```
+Route: Trivial — one string, file named.
+Fixed src/components/Login.tsx:24.
+```
+
+No census, no budget, no review. A router that ceremonies a typo gets switched
+off in a week, and then none of the guardrails run at all.
+
 ## Tuning
 
 - **Change the constraint** — edit `skills/foreman/references/ladder.md`. It is
