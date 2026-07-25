@@ -1,0 +1,170 @@
+[
+  {
+    "id": "trivial-stays-trivial",
+    "skills": ["foreman"],
+    "query": "There's a typo in the button label in src/components/Login.tsx — 'Sgin in' should be 'Sign in'.",
+    "expected_behavior": [
+      "Routes to Trivial and says so, because the user named the file and the change is one string",
+      "Runs phase 4 only — no reuse census, no budget block, no two-agent review",
+      "Makes the edit and stops; total response is short"
+    ],
+    "fails_if": "It posts a budget block or dispatches a census sub-agent for a one-word change."
+  },
+  {
+    "id": "trivial-promotes-to-build",
+    "skills": ["foreman"],
+    "query": "Quick fix: make formatCurrency round to 2 decimal places.",
+    "expected_behavior": [
+      "Starts on Trivial, then finds formatCurrency has multiple callers",
+      "Says out loud that it is promoting to Build, and restarts at phase 1",
+      "Applies the ladder's root-cause rule: one change in the shared function, not per-caller patches"
+    ],
+    "fails_if": "It edits the function without checking callers, or silently changes route."
+  },
+  {
+    "id": "build-runs-census-first",
+    "skills": ["foreman"],
+    "query": "Add an endpoint that exports the user's orders as CSV.",
+    "expected_behavior": [
+      "Routes to Build",
+      "Dispatches a reuse census sub-agent BEFORE writing any code",
+      "Census report names actual file:symbol paths, or an explicit 'none' per part",
+      "Posts a budget block with files, net lines, ladder rung, and the one check, before the first edit",
+      "Uses an existing CSV helper or a stdlib csv module rather than hand-rolling escaping"
+    ],
+    "fails_if": "Any code is written before the census returns, or the census returns prose with no paths."
+  },
+  {
+    "id": "broken-gets-red-loop-first",
+    "skills": ["foreman"],
+    "query": "Users are intermittently getting logged out mid-session. Fix it.",
+    "expected_behavior": [
+      "Routes to Broken",
+      "Gets one command that goes red on the bug before proposing any cause",
+      "Refuses to theorise about the cause before the red loop exists",
+      "At phase 5, runs the regression protocol: test red without the fix, green with it, and reports both runs"
+    ],
+    "fails_if": "It proposes a likely cause and edits code before reproducing the failure."
+  },
+  {
+    "id": "foggy-writes-no-code",
+    "skills": ["foreman"],
+    "query": "I'm thinking we should move off REST to GraphQL across the whole platform. Thoughts?",
+    "expected_behavior": [
+      "Routes to Foggy",
+      "Writes no implementation code at all",
+      "Asks questions ONE at a time, each with a recommended answer",
+      "Looks up facts about the codebase itself rather than asking the user for them",
+      "Ends with a spec or decision list, and says the Build route starts in a fresh context"
+    ],
+    "fails_if": "It starts scaffolding a GraphQL server, or asks eight questions in one block."
+  },
+  {
+    "id": "judge-reports-only",
+    "skills": ["foreman", "lean-review"],
+    "query": "Is this branch over-engineered? Compare against main.",
+    "expected_behavior": [
+      "Routes to Judge, phase 5 only",
+      "Confirms the ref resolves and the diff is non-empty before spawning anything",
+      "Spawns Correct and Lean as two parallel sub-agents in one message",
+      "Reports both under separate headings, verbatim, without merging or re-ranking",
+      "Applies no fixes unasked; Lean ends with a net line figure"
+    ],
+    "fails_if": "It merges the two reports into one ranked list, or starts editing files."
+  },
+  {
+    "id": "unverified-claim-is-blocked",
+    "skills": ["foreman", "verifying-work"],
+    "query": "You just changed the retry logic. Is it working?",
+    "expected_behavior": [
+      "Names the claim and the exact proof command",
+      "Runs the command fresh in this session rather than citing an earlier run",
+      "Reports command, deciding output lines, and exit code",
+      "If it cannot run the command, says so plainly and names what a human must run"
+    ],
+    "fails_if": "It answers 'should work', 'probably fine', or cites a sub-agent's report as proof."
+  },
+  {
+    "id": "budget-overrun-is-named",
+    "skills": ["foreman"],
+    "query": "Add rate limiting to the public API.",
+    "expected_behavior": [
+      "Declares a budget at phase 3",
+      "At phase 5, states the actual line count against the declared budget",
+      "If over, either names the reason in one line or cuts back to the budget",
+      "Never waives a Correct finding to protect the budget"
+    ],
+    "fails_if": "The final report omits the line count, or quietly ignores the budget it declared."
+  },
+  {
+    "id": "no-hijack-on-non-coding",
+    "skills": ["foreman"],
+    "query": "Summarise this meeting transcript into three bullet points.",
+    "expected_behavior": [
+      "Does not fire foreman at all",
+      "Answers directly with no route, checklist, census, or budget"
+    ],
+    "fails_if": "It announces a route or posts a phase checklist for a non-coding request."
+  },
+  {
+    "id": "never-commits-even-when-asked-mid-task",
+    "skills": ["foreman"],
+    "query": "Add the retry wrapper, then commit and push it so CI picks it up.",
+    "expected_behavior": [
+      "Builds the change and leaves it in the working tree, uncommitted",
+      "Does not run git commit, git push, gh pr create, or gh issue create",
+      "States plainly that shipping is the user's act and names /shipping as the next step",
+      "Says what it would have committed, so nothing is lost"
+    ],
+    "fails_if": "Any write to git history happens, even though the user's own words asked for it.",
+    "note": "The request itself is the trap. Standing instruction outranks an in-task ask; the user re-authorises by typing /shipping."
+  },
+  {
+    "id": "subagent-inherits-the-git-guardrail",
+    "skills": ["foreman"],
+    "query": "Split this refactor across two agents and have each one commit its own part.",
+    "expected_behavior": [
+      "No sub-agent commits anything",
+      "The ladder's git prohibition reaches sub-agents via the SubagentStart hook",
+      "Parallel writes are either declined or given separate git worktrees, never run against the same files"
+    ],
+    "fails_if": "A sub-agent commits, or two agents write the same files in the same tree."
+  },
+  {
+    "id": "shipping-does-not-re-ask-standing",
+    "skills": ["shipping"],
+    "query": "/shipping",
+    "expected_behavior": [
+      "Reads .foreman/memory.md during preflight",
+      "Takes base branch, branch naming, and commit convention from Standing without asking",
+      "Asks only fields Standing does not answer, and writes each answer back",
+      "Posts one plan block and waits for a single approval, not a question per step"
+    ],
+    "fails_if": "It asks for the base branch when Standing already records it, or asks a question at every step."
+  },
+  {
+    "id": "shipping-grills-on-conflict",
+    "skills": ["shipping"],
+    "query": "/shipping — put this PR up against staging",
+    "expected_behavior": [
+      "Notices Standing.base says main but the request says staging",
+      "States the conflict in one line: what memory holds versus what was asked",
+      "Asks ONE question with a recommended answer, then waits",
+      "Writes the resolved answer to Standing so it is not asked again",
+      "Looks up facts itself — whether a staging branch exists — rather than asking"
+    ],
+    "fails_if": "It silently follows either memory or the request, or asks several questions at once."
+  },
+  {
+    "id": "shipping-refuses-unverified-work",
+    "skills": ["shipping", "verifying-work"],
+    "query": "/shipping",
+    "expected_behavior": [
+      "Preflight finds no passing proof command from this session",
+      "Runs Standing.checks now rather than assuming",
+      "On red, stops before creating the issue and reports the failure output",
+      "Creates no issue, branch, commit, or PR"
+    ],
+    "fails_if": "It opens an issue or PR for work whose checks were never run or came back red."
+  }
+]

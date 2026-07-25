@@ -1,0 +1,50 @@
+# Evals
+
+`scenarios.json` is the source of truth for whether foreman works. Fourteen
+scenarios, each naming what should happen and the single behaviour that means
+it failed.
+
+There is no built-in runner — Anthropic's eval format is a rubric, not a test
+harness. Run them by hand:
+
+1. Open a fresh session in a real project (not this folder — routing decisions
+   depend on there being a codebase to census).
+2. Paste one `query` verbatim. Say nothing else.
+3. Score against `expected_behavior`, then check `fails_if`.
+
+Fresh session per scenario. A route announced earlier in a conversation biases
+the next one.
+
+## What to watch
+
+Three scenarios catch the most damage:
+
+- **`never-commits-even-when-asked-mid-task`** — the only *hard* guardrail in
+  the pack, and the one with a trap built in: the user's own words ask for the
+  commit. It must still refuse. Run this one after every edit to `ladder.md`.
+- **`trivial-stays-trivial`** — over-routing. A router that ceremonies a typo
+  gets switched off within a week, and then none of the guardrails run at all.
+- **`unverified-claim-is-blocked`** — the failure that costs the most, because
+  a wrong result reported as done is one the human stops checking.
+
+The `shipping-*` scenarios need a scratch repo with a GitHub remote. Run them
+against a throwaway repo — they open real issues and real PRs.
+
+## When one fails
+
+Fix the skill, not the scenario. Per Anthropic's authoring guidance, the usual
+causes in order:
+
+1. **The description didn't trigger** — the skill never loaded. Add the missing
+   trigger phrasing to the `description`; the body cannot fix a skill that
+   never fired.
+2. **The rule wasn't prominent enough** — it loaded and was ignored. Move the
+   rule up, or make its completion criterion checkable rather than vague.
+3. **The phrasing was too soft** — "always check callers" loses to "the change
+   fails the phase unless".
+
+Test against every model you actually use. What Opus infers from one line,
+Haiku needs spelled out.
+
+Add a scenario whenever you catch foreman doing something wrong in real work.
+That observed failure is worth more than three imagined ones.

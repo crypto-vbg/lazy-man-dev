@@ -1,0 +1,18 @@
+{
+  "_comment": "Manual fallback — `node install.js` writes this for you with the real path filled in. Wiring it by hand: replace <REPO> with the absolute path to your lazy-man-dev clone, then merge the \"hooks\" key into ~/.claude/settings.json, adding to an existing hooks object rather than replacing it. The path is absolute because ${CLAUDE_PLUGIN_ROOT} only resolves inside an installed plugin.",
+  "hooks": {
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"<REPO>/hooks/foreman-subagent.js\"",
+            "commandWindows": "if (Get-Command node -ErrorAction SilentlyContinue) { node \"<REPO>\\hooks\\foreman-subagent.js\" }",
+            "timeout": 5,
+            "statusMessage": "Loading the ladder..."
+          }
+        ]
+      }
+    ]
+  }
+}

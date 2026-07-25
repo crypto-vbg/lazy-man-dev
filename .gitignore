@@ -1,0 +1,7 @@
+# Working state written by the skills themselves — never a deliverable.
+.foreman/
+
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
