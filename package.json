@@ -1,0 +1,16 @@
+{
+  "name": "lazy-man-dev",
+  "version": "1.0.1",
+  "description": "One skill you call. It routes the task, dispatches sub-agents, and refuses to hand back more code than the job needed.",
+  "license": "MIT",
+  "private": true,
+  "_type": "Node resolves module kind from the NEAREST package.json above a file. Without this one, cloning lazy-man-dev inside a project whose package.json says \"type\": \"module\" makes Node treat these CommonJS scripts as ESM and `require` explodes. This pins the whole repo to CommonJS regardless of where it is cloned.",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=14"
+  },
+  "scripts": {
+    "setup": "node install.js",
+    "doctor": "node doctor.js"
+  }
+}

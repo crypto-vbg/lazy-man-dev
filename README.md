@@ -117,6 +117,12 @@ Node 14+ is the only prerequisite. The installer links the five skills into
 (backing it up first, and preserving every key already there), then runs the
 doctor and prints a verdict.
 
+**Clone it once, and not inside a project.** The default install is global —
+the skills then work in every project on the machine, so there is no reason to
+clone it again per repo. Somewhere like `~/tools/lazy-man-dev` is ideal. A
+clone that lives inside another repo shows up in that repo's `git status`, and
+the hook path in `settings.json` breaks the day you delete it.
+
 **Then start a new Claude Code session** — hooks load at session start.
 
 Links, not copies, so editing a skill in the clone takes effect immediately. On
@@ -399,6 +405,7 @@ that:
 
 | Symptom | Cause | Fix |
 |---|---|---|
+| `ReferenceError: require is not defined in ES module scope` | You are on a version before 1.0.1, cloned inside a project whose `package.json` has `"type": "module"` — Node walks up and finds that one | `git pull`. The repo now ships its own `package.json` pinning it to CommonJS. Better still, clone it outside the project |
 | Skills do not appear at all | Hooks and skills load at session start | Start a new session |
 | `foreman` never fires on its own | Another skill's description is winning, or the request looked trivial | Type `/foreman` and check `evals/scenarios.json` still passes |
 | Sub-agents ignore the ladder | Hook not wired, or `node` not on `PATH` when Claude Code launched | `node doctor.js`, then re-run `node install.js` |
