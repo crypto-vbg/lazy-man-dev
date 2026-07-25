@@ -97,13 +97,13 @@ step 2, it is an unknown.
 ## Teaching back, when the user is new to the concept
 
 When research feeds an interview — someone knows the goal but not the domain —
-each decision must be put in terms they can actually answer:
+follow [`../foreman/references/asking.md`](../foreman/references/asking.md),
+with one addition that belongs to research specifically:
 
-- **Lead with the consequence, not the mechanism.** "Do you want users to stay
-  logged in after closing the browser?" beats "session cookie or JWT?"
-- **One question at a time**, each with your recommendation attached.
-- **Never ask a question the research already answers.** Facts are yours to
-  look up; only trade-offs the user has a stake in are theirs to settle.
+**Good research removes questions rather than generating them.** Every fact you
+sourced is a decision the user no longer has to make, so sort the remaining
+list before speaking: most of it is now `Derive`. What is left goes as a
+consequence they can weigh, with your recommendation attached.
 
 A question the user cannot parse is a question you have not finished
 researching.

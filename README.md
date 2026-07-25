@@ -57,14 +57,15 @@ lazy-man-dev/
 │   │   └── references/
 │   │       ├── routes.md          6 routes → which phases run
 │   │       ├── ladder.md          the constraint (also what the hook injects)
-│   │       └── memory.md          .foreman/memory.md format + conflict rules
+│   │       ├── memory.md          .foreman/memory.md format + conflict rules
+│   │       └── asking.md          which questions to ask, and how few
 │   ├── reuse-census/SKILL.md      looks INWARD: what this repo already has
 │   ├── researching/SKILL.md       looks OUTWARD: primary sources, version-pinned
 │   ├── lean-review/SKILL.md       parallel Correct ∥ Lean review
 │   ├── verifying-work/SKILL.md    evidence gate on any completion claim
 │   └── shipping/SKILL.md          issue → branch → commit → PR. YOU type this
 ├── evals/
-│   ├── scenarios.json             16 scenarios: routing + guardrails
+│   ├── scenarios.json             17 scenarios: routing + guardrails
 │   └── README.md                  how to run and score them
 └── hooks/
     ├── foreman-subagent.js        injects the ladder into every sub-agent
@@ -111,6 +112,36 @@ contradiction in one line, asks **one** question with a recommended answer,
 waits, then writes the answer to `Standing`. Reality outranks memory and you
 outrank both — but never silently. Facts it looks up itself; only decisions
 reach you.
+
+## Asking
+
+Being interrogated is as bad as being guessed at. Decisions are not peers —
+roughly a fifth of them are **load-bearing**, and answering one settles the
+rest by implication. Finding that fifth is the whole job.
+
+So before anything is asked aloud, every open decision is sorted into one of
+four buckets:
+
+| Bucket | Meaning | Action |
+|---|---|---|
+| **Derive** | the repo, lockfile, convention, `Standing`, or the research answers it | never ask |
+| **Follow** | determined by another decision on the list | resolves with its parent |
+| **Default** | a sane default exists and reversing it is cheap | take it, say so in one line |
+| **Ask** | genuinely yours, and expensive to get wrong | ask — highest fan-out first |
+
+Only the last bucket is spoken. **Budget: three questions.** Needing more means
+the load-bearing one has not been found yet.
+
+Each answer is then *propagated*, and the collapse is shown, so you can see
+what the question bought:
+
+> Postgres it is. That settles the migration tool (Prisma, already a
+> dependency), the hosting (Supabase, from `Standing`), and the ID type (uuid).
+> One question left.
+
+Two rules keep it honest in both directions: never default something
+irreversible to save a question, and never ask something the lockfile already
+answered. Full discipline in `skills/foreman/references/asking.md`.
 
 ## Install
 
@@ -212,7 +243,7 @@ pack exists to prevent.
 
 ### Check it still behaves
 
-`evals/scenarios.json` holds sixteen scenarios: one per route, plus the three
+`evals/scenarios.json` holds seventeen scenarios: one per route, plus the three
 failure modes that matter most — committing when it must not, over-routing a
 trivial change, and letting an unverified claim through. Run them by hand after
 any edit to a skill; see `evals/README.md`.

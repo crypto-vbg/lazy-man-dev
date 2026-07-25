@@ -107,6 +107,19 @@
     "fails_if": "It announces a route or posts a phase checklist for a non-coding request."
   },
   {
+    "id": "asks-the-load-bearing-question-not-all-of-them",
+    "skills": ["foreman"],
+    "query": "Add a blog to my site.",
+    "expected_behavior": [
+      "Derives from the repo rather than asking: framework, styling, routing convention, deploy target",
+      "Asks at most three questions, and the first has the highest fan-out — where content lives (markdown files in the repo vs a CMS) settles storage, build-time vs runtime rendering, and the editing workflow at once",
+      "Defaults the reversible leftovers out loud rather than asking: 'Recommend RSS on, say so if you want it off'",
+      "After the answer, states in one line which decisions it just settled",
+      "Never asks about anything the lockfile or existing pages already answer"
+    ],
+    "fails_if": "It asks four or more questions, or asks a question the repo already answers, or presents options with no recommendation."
+  },
+  {
     "id": "researches-when-the-user-lacks-the-concept",
     "skills": ["foreman", "researching"],
     "query": "I want people to be able to log into my site with their Google account. I don't really know how any of that works.",

@@ -51,8 +51,10 @@ were just asked for.
 Aligned, or merely missing a field → continue; ask absent fields in step 3.
 
 **Contradictory** → grill, per the memory reference: state the conflict in one
-line, ask **one** question with a recommended answer, wait, then write the
-answer to `Standing`. Facts you look up yourself; only the decision is theirs.
+line, then ask by
+[`../foreman/references/asking.md`](../foreman/references/asking.md) — one
+question, your recommendation attached — and write the answer to `Standing`.
+Facts you look up yourself; only the decision is theirs.
 
 Watch for the common one: memory's `Log` says this work already shipped, and it
 is still sitting uncommitted. That means an earlier PR was closed, reverted, or

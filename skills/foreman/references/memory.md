@@ -98,11 +98,13 @@ Three ways this shows up, one response.
 Stop and grill:
 
 1. State the conflict in one line: what memory holds, what you observe.
-2. Ask **one** question, with your recommended answer.
-3. Wait. Do not batch questions — a wall of them is unanswerable.
-4. Look up every *fact* yourself. Only the *decision* goes to the user.
-5. Write the answer to `Standing` before continuing, so it is asked once and
+2. Ask by [`asking.md`](asking.md) — one question, your recommendation
+   attached, then wait.
+3. Write the answer to `Standing` before continuing, so it is asked once and
    never again.
+
+A conflict is usually a single load-bearing question. If you find yourself with
+three, sort them first: most will follow from the one you have not asked yet.
 
 The grill is for a genuine contradiction. A field that is simply absent is not
 a conflict — ask it plainly, once, and record it.

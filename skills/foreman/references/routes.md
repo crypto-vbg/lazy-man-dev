@@ -26,11 +26,10 @@ watch turn green is a guess. Phase 5's gate is the regression test that keeps
 it green.
 
 **Foggy does not build.** The deliverable is a settled understanding: the
-decisions named, each one put to the user and answered, written down as a spec
-or a set of tickets. Interview one question at a time and recommend an answer
-for each — a wall of questions is unanswerable. Look up every *fact* yourself;
-only the *decisions* go to the user. When the fog clears, re-enter at phase 1
-on the **Build** route with a fresh context.
+decisions named, settled, and written down as a spec or a set of tickets.
+Interview by [`asking.md`](asking.md) — sort the decisions, ask only the
+load-bearing ones, default the rest. Three questions is the budget. When the
+fog clears, re-enter at phase 1 on the **Build** route with a fresh context.
 
 **Research before you interview.** Two kinds of fog look identical at first and
 need opposite moves. *Undecided* fog — the user knows the domain and has not

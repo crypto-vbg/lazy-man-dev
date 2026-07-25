@@ -10,7 +10,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 
 const SKILLS = ['foreman', 'reuse-census', 'lean-review', 'verifying-work', 'researching', 'shipping'];
-const REFS = ['ladder.md', 'routes.md', 'memory.md'];
+const REFS = ['ladder.md', 'routes.md', 'memory.md', 'asking.md'];
 
 const project = process.argv.includes('--project');
 const claudeDir = process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');

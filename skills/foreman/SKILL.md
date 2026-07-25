@@ -36,6 +36,11 @@ format and its conflict rules live in
 [`references/memory.md`](references/memory.md). A question already answered
 there is never asked again.
 
+**Ask few questions, and the right ones.** Whenever a phase needs something
+from the user, [`references/asking.md`](references/asking.md) decides what gets
+asked: sort the open decisions, derive or default everything you can, and spend
+the questions on the load-bearing few that settle the rest. Budget: three.
+
 ## Phase 1 — Route
 
 Read `.foreman/memory.md` if it exists — it is small, read it whole. It tells
