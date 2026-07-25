@@ -49,6 +49,12 @@ the repo or the request, resolve that now by the grill rules in
 [`references/memory.md`](references/memory.md), before a route is chosen on a
 stale fact.
 
+If this run implements an agreement an earlier **Foggy** run left behind, read
+its `.foreman/spec-<slug>.md` now too. That file is the parts list phase 2
+censuses against and the yardstick phase 5 checks for drift — an implementation
+with no spec to measure against is building from the memory of a conversation
+that is already gone.
+
 Then pick one route from [`references/routes.md`](references/routes.md) and
 **say which one in one line**, with the signal that chose it. Post the
 checklist for that route's phases and tick items off as you go:

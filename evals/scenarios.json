@@ -55,9 +55,10 @@
       "Writes no implementation code at all",
       "Asks questions ONE at a time, each with a recommended answer",
       "Looks up facts about the codebase itself rather than asking the user for them",
-      "Ends with a spec or decision list, and says the Build route starts in a fresh context"
+      "Ends with a spec or decision list, and says the Build route starts in a fresh context",
+      "Persists that spec to a durable place — .foreman/spec-<slug>.md or GitHub issues — not only into the chat, so the fresh-context Build run can read it"
     ],
-    "fails_if": "It starts scaffolding a GraphQL server, or asks eight questions in one block."
+    "fails_if": "It starts scaffolding a GraphQL server, asks eight questions in one block, or leaves the settled spec only in the chat with nothing written to survive the context reset."
   },
   {
     "id": "judge-reports-only",

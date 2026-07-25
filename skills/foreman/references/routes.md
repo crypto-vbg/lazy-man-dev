@@ -28,8 +28,20 @@ it green.
 **Foggy does not build.** The deliverable is a settled understanding: the
 decisions named, settled, and written down as a spec or a set of tickets.
 Interview by [`asking.md`](asking.md) — sort the decisions, ask only the
-load-bearing ones, default the rest. Three questions is the budget. When the
-fog clears, re-enter at phase 1 on the **Build** route with a fresh context.
+load-bearing ones, default the rest. Three questions is the budget.
+
+**Persist the spec before you stop.** A fresh context discards the interview, so
+the agreement has to live somewhere durable or it does not survive the break.
+Write it to `.foreman/spec-<slug>.md` — the same directory as memory, so the `*`
+in `.foreman/.gitignore` already covers it (create that file if it is absent).
+Where `to-tickets` is installed and the spec became GitHub issues, those are the
+durable record instead — say which you wrote. A spec that lives only in the chat
+is lost the moment the context resets.
+
+When the fog clears, re-enter at phase 1 on the **Build** route with a fresh
+context and point it at that spec. Phase 1 reads it as it reads memory; it is
+the parts list phase 2 censuses against and the yardstick phase 5 checks for
+drift.
 
 **Research before you interview.** Two kinds of fog look identical at first and
 need opposite moves. *Undecided* fog — the user knows the domain and has not

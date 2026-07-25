@@ -17,6 +17,10 @@ without editing the project's own `.gitignore`.
 
 Memory is working state, not a deliverable. It is never committed.
 
+The same directory also holds any `spec-<slug>.md` a Foggy run persisted (see
+[`routes.md`](routes.md)) — the `*` gitignore covers those too. Like memory,
+they are working state the Build route reads on re-entry, not deliverables.
+
 ## Standing — durable answers, asked once
 
 Answers that hold across runs. **Anything here is never asked again.** Repeated
