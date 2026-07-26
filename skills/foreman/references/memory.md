@@ -23,8 +23,9 @@ the same `*` gitignore, and neither of them is memory:
 - `spec-<slug>.md` — what a Foggy run settled (see [`routes.md`](routes.md)).
   The Build route reads it on re-entry.
 - `run-<slug>.md` — the live run: phase 3's budget block plus phase 1's
-  `git status --porcelain` baseline. It exists only while a run is in flight and
-  phase 6 deletes it.
+  `git status --porcelain` baseline. Only the routes that write code create one
+  (Build, Broken); it exists while that run is in flight and phase 6 deletes it.
+  A run that stopped early keeps its file, with the blocker written into it.
 
 Neither is a deliverable, and neither is committed.
 
@@ -94,7 +95,9 @@ Write at two moments only, so the file stays a ledger rather than a diary:
 2. **A run completes** — append one `Log` entry.
 
 Never log intentions, plans, or in-progress notes. An entry describes
-something that finished.
+something that finished. A run that stopped early is not one: it keeps its run
+file and gets no entry, so the next session reads it as live work rather than
+as history.
 
 That rule is about **this file**, and it is why in-flight state lives in
 `run-<slug>.md` instead. A budget nobody has met yet does not belong in a ledger

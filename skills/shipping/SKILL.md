@@ -1,6 +1,6 @@
 ---
 name: shipping
-description: Turn finished work into an issue, a branch, a commit, and a PR. The only skill in this pack that touches git — and it runs only when you type it.
+description: Turn finished work into an issue, a branch, a commit, and a PR — or one more commit onto the PR that is already open. The only skill in this pack that touches git, and it runs only when you type it.
 disable-model-invocation: true
 ---
 
@@ -30,6 +30,7 @@ git status --porcelain          # what is actually uncommitted
 git branch --show-current       # where you are standing
 git remote -v                   # the repo
 gh auth status                  # can we talk to GitHub at all
+gh pr view --json number,url,state,headRefName   # is this branch already shipped?
 ```
 
 Read `.foreman/memory.md`. Then check three things and stop on any of them:
@@ -54,8 +55,21 @@ target, `pyproject.toml`'s dev dependencies. Find one → run it, and record it 
 instead, and let the user approve *that*. Never invent a command, and never
 report an absent check as a passing one.
 
-*Done when:* the change set is known, clean of secrets, and either proven green
-or explicitly carried as unverified with the reason.
+**Then name the mode**, because the rest of this skill has two shapes:
+
+- **New** — no open PR for this branch. Issue, branch, commit, push, PR.
+- **Update** — `gh pr view` returned an **open** PR whose head is the branch you
+  are standing on. The issue exists, the branch exists, the PR exists. Shipping
+  again means one more commit on top and a push. It does **not** mean a second
+  issue and a second PR for work already under review.
+
+Review feedback is the ordinary case here, and the first `/shipping` of a piece
+of work is rarely the last. A closed or merged PR is not update mode — that is
+new work on a finished thread, so it takes the new path, and step 2 grills the
+contradiction if memory says otherwise.
+
+*Done when:* the change set is known, clean of secrets, either proven green or
+explicitly carried as unverified with the reason, and the mode is named.
 
 ## 2. Reconcile
 
@@ -71,8 +85,10 @@ question, your recommendation attached — and write the answer to `Standing`.
 Facts you look up yourself; only the decision is theirs.
 
 Watch for the common one: memory's `Log` says this work already shipped, and it
-is still sitting uncommitted. That means an earlier PR was closed, reverted, or
-never merged — find out which before opening a second one.
+is still sitting uncommitted. Step 1's `gh pr view` usually settles it — an open
+PR means this is update mode and there is no contradiction, only a second round.
+A **closed, merged, or absent** PR is the real conflict: find out which before
+opening a second one.
 
 *Done when:* no contradiction remains between memory, repo, and request.
 
@@ -100,6 +116,19 @@ Ask only what `Standing` does not already answer. If `base` is absent, this is
 the moment to ask it — once — and record it. A repo with an unusual base
 (`develop`, `staging`) must be asked, never inferred from what looks default.
 
+**Update mode posts the shorter block**, because everything the long one asks
+has already been answered and approved once:
+
+```
+pr:      #<n> <title> — <url>          [open, <base> ← <branch>]
+commit:  <message, per Standing.commits>
+files:   <N> files, <+A/-B>
+verified: <command> → exit <code>      [or: none — <reason>]
+```
+
+No issue line, no base line, no branch line — those are settled by the PR that
+already exists. Re-asking them invites an answer that contradicts the open PR.
+
 Post the block and wait for a yes. Anything other than a clear yes stops here.
 
 *Done when:* the user has approved the block.
@@ -107,6 +136,8 @@ Post the block and wait for a yes. Anything other than a clear yes stops here.
 ## 4. Execute
 
 In order. Stop on the first failure and report it — no retry with a bypass flag.
+
+**New mode:**
 
 ```bash
 gh issue create --title "<title>" --body "<body>"     # → #N
@@ -128,7 +159,30 @@ Notes that matter:
   and the PR's closing line. One thread, three places.
 - The PR body ends with `Closes #N` so merging closes the issue.
 
-*Done when:* the PR URL exists. Print it.
+**Update mode:**
+
+```bash
+git add <the files in the plan>       # named paths, same rule
+git commit -m "<message>"
+git push                              # no -u; upstream is already set
+```
+
+Three commands, and the PR picks the commit up on its own. What matters is
+what is *absent*:
+
+- **No second issue and no second PR.** The thread already exists; a duplicate
+  splits the review across two places and leaves one of them to rot.
+- **No `--force`, no `--force-with-lease`, no `--amend`.** The rule at the top
+  of this file is at its most tempting here, because the last commit is yours
+  and tidying it looks free. It is not: a reviewer may have read it, and
+  someone else may have pushed on top.
+- **A rejected push is a finding, not an obstacle.** It means the remote branch
+  moved — someone pushed to the PR, or a maintainer committed a suggestion.
+  Report the rejection and stop. Do not force, and do not rebase; both are the
+  user's to run.
+
+*Done when:* the PR URL exists — created in new mode, updated in update mode.
+Print it either way.
 
 ## 5. Record
 
@@ -137,6 +191,13 @@ that got answered along the way:
 
 ```
 shipped: issue #<n>, branch <name>, PR #<n> → <base>
+```
+
+Update mode does not append a second entry — it adds one line to the existing
+one, so the ledger keeps one row per thread rather than one per push:
+
+```
+updated: PR #<n>, <commit subject>
 ```
 
 Then say what remains for the human: review, merge, deploy. **Merging is not

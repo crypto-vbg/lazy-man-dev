@@ -9,7 +9,7 @@ exists to prevent.
 | **Trivial** | A single obvious edit whose location is already known: typo, rename, config value, version bump, a fix the user has already pointed at. | 4 only | Yes |
 | **Build** | Add, extend, or refactor something that fits in one session: a feature, an endpoint, a component, a migration. | 1–6 | Yes |
 | **Broken** | Something throws, fails, regressed, flakes, or runs slow. | 1–6, with the **red loop** first | Yes |
-| **Foggy** | Too big or too vague for one session: greenfield, "should we…", a rewrite, a request with unsettled decisions inside it. | 1–3, then stop | **No** |
+| **Foggy** | Too big or too vague for one session: greenfield, "should we…", a rewrite, a request with unsettled decisions inside it. | 1–3, then 6 | **No** |
 | **Judge** | "Review this", "is this over-engineered", "audit the repo", "what can we delete". | 5 only | **No** |
 | **Learn** | "How does X work", "where does Y live", "what calls Z" — and "what even *is* X", when the concept is new to the user. | 2 only | **No** |
 
@@ -37,6 +37,12 @@ in `.foreman/.gitignore` already covers it (create that file if it is absent).
 Where `to-tickets` is installed and the spec became GitHub issues, those are the
 durable record instead — say which you wrote. A spec that lives only in the chat
 is lost the moment the context resets.
+
+The spec is the *only* file a Foggy run leaves. It writes no `run-<slug>.md`:
+that file means a build is in flight, and a Foggy run has finished, not paused.
+Leaving one behind is how a completed interview reads to the next session as
+work abandoned halfway. Phase 6 closes the run with a single `Log` entry naming
+the spec.
 
 **An existing `spec-<slug>.md` is a fact to reconcile, not a file to overwrite.**
 Read it first. Where it contradicts what was just agreed, grill by

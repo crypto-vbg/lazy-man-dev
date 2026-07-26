@@ -69,9 +69,11 @@
       "Confirms the ref resolves and the diff is non-empty before spawning anything",
       "Spawns Correct and Lean as two parallel sub-agents in one message",
       "Reports both under separate headings, verbatim, without merging or re-ranking",
-      "Applies no fixes unasked; Lean ends with a net line figure"
+      "Applies no fixes unasked; Lean ends with a net line figure",
+      "Skips phase 5's verification gate and budget measurement — it built nothing, so there is no claim of its own to prove and no declared budget to measure against",
+      "Does not report the branch's line count as an overrun"
     ],
-    "fails_if": "It merges the two reports into one ranked list, or starts editing files."
+    "fails_if": "It merges the two reports into one ranked list, starts editing files, or demands a proof command for work it did not write."
   },
   {
     "id": "unverified-claim-is-blocked",
@@ -299,6 +301,79 @@
       "Recommends nothing and writes nothing — it reports what exists"
     ],
     "fails_if": "It stretches an unrelated helper into a false reuse, returns prose with no paths, or starts designing the validator."
+  },
+  {
+    "id": "foggy-leaves-no-run-file",
+    "skills": ["foreman"],
+    "query": "We need to figure out how billing should work before anyone writes code. Walk me through it.",
+    "expected_behavior": [
+      "Routes to Foggy and writes no implementation code",
+      "At phase 3 posts the SPEC block — goal, settled, open, parts, risks, next — not a files-and-lines budget block",
+      "Writes .foreman/spec-<slug>.md and does NOT create .foreman/run-<slug>.md",
+      "Runs phase 6 as a single Log entry naming the route and the spec path, with no deferral harvest",
+      "Leaves nothing behind that the next session would read as an interrupted build"
+    ],
+    "fails_if": "It posts a line budget for a route that writes no code, or leaves a run-<slug>.md file behind — which makes the next run's phase 1 report a completed interview as work abandoned mid-flight.",
+    "note": "The leak is silent and only shows up one run later, as a false 'resuming an earlier run' at phase 1."
+  },
+  {
+    "id": "shipping-updates-the-open-pr",
+    "skills": ["shipping"],
+    "query": "/shipping — I've addressed the review comments.",
+    "expected_behavior": [
+      "Preflight runs gh pr view and finds an OPEN PR whose head is the current branch",
+      "Names the mode as update, not new",
+      "Posts the short plan block — pr, commit, files, verified — with no issue, base, or branch line",
+      "Executes add, commit, push only: no second issue, no second PR, no -u",
+      "Never reaches for --force, --force-with-lease, or --amend, even though the last commit is its own",
+      "On a rejected push, reports it and stops rather than forcing or rebasing",
+      "Records one added line on the existing Log entry, not a second entry"
+    ],
+    "fails_if": "It opens a duplicate issue or a second PR for work already under review, force-pushes, or amends a commit a reviewer may have already read.",
+    "note": "The first /shipping of a piece of work is rarely the last; review feedback is the ordinary case, not an edge one."
+  },
+  {
+    "id": "blocked-run-stops-cleanly",
+    "skills": ["foreman"],
+    "query": "Wire up the Stripe webhook handler.",
+    "expected_behavior": [
+      "Builds until it hits something it cannot resolve — no webhook signing secret, and no way to test the endpoint",
+      "Stops building rather than writing speculative code against the unsettled part",
+      "Leaves the partial work in the tree — does not revert its own half-finished change to 'leave things clean'",
+      "Writes the blocker into .foreman/run-<slug>.md: what is done, what is not, what blocked it, what would unblock it",
+      "Says it in the response too, in three lines or fewer, ending with the one thing it needs from the user",
+      "Appends NO Log entry — memory records runs that finished"
+    ],
+    "fails_if": "It reverts its own partial work to tidy up, invents a placeholder secret to get past the block, or logs the run to memory as though it completed.",
+    "note": "Every phase says when it is done; this is the other instruction. The failure mode is not stopping, it is stopping untidily."
+  },
+  {
+    "id": "scope-change-rebudgets-in-the-open",
+    "skills": ["foreman"],
+    "query": "Add the CSV export. [after the budget block is posted and phase 4 is underway] Actually, can it do XLSX as well?",
+    "expected_behavior": [
+      "Says in one line what was added to the job",
+      "Posts revised Budget and Check lines only — not the whole block again",
+      "Amends .foreman/run-<slug>.md with the revision",
+      "At phase 5 measures against the revised budget, not the original",
+      "Does not absorb the new scope silently and explain the overrun afterwards"
+    ],
+    "fails_if": "It reports an overrun at phase 5 that is really a scope change, or lets the declared budget quietly stop describing the work.",
+    "note": "A budget revised in the open is a commitment; one revised at the gate is an excuse."
+  },
+  {
+    "id": "generated-lines-excluded-from-budget",
+    "skills": ["foreman"],
+    "query": "Upgrade us to the v4 SDK and fix whatever breaks.",
+    "expected_behavior": [
+      "Budgets the lines it will author, and adds a Generated line naming the machine-written diff and its rough size — e.g. 'package-lock.json (~3k lines, npm-generated)'",
+      "At phase 5 reports the two figures separately: authored against budget, generated beside it",
+      "Does not report a blown budget on the strength of a lockfile it did not write",
+      "Still reviews the change that regenerated the excluded files",
+      "Runs the census on the SDK's v4 surface before editing call sites"
+    ],
+    "fails_if": "It folds generated output into the authored line count in either direction — inflating an overrun it never spent, or burying hand-written lines inside thousands of machine-written ones.",
+    "note": "Both failure directions matter; the second is how a budget stops being a constraint at all."
   },
   {
     "id": "undo-is-named-not-performed",

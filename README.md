@@ -267,13 +267,26 @@ Invoke a piece directly when that is all you want:
 Then it stops, with the change uncommitted in the working tree. Phase 7 is
 yours: `/shipping`.
 
-**Trivial runs phase 4 alone.** A typo does not get a census, a budget, and a
-two-agent review — a router that ceremonies every request is the bloat this
-pack exists to prevent.
+**The route decides which phases run**, and each phase says which routes it
+binds. A router that ceremonies every request is the bloat this pack exists to
+prevent:
+
+| Route | Phases | Notes |
+|---|---|---|
+| Trivial | 4 | A typo gets no census, no budget, no two-agent review. |
+| Build | 1–6 | The full run. |
+| Broken | 1–6 | Red loop first; phase 5 adds the regression protocol. |
+| Foggy | 1–3, then 6 | Phase 3 posts a **spec** block, not a budget. Writes a spec file, no run file. Phase 6 is one `Log` entry. |
+| Judge | 5 | Review half only — nothing was built, so no verify gate and no budget to measure. |
+| Learn | 2 | Delivers a trace, not census verdicts. |
+
+A run that **cannot** finish has its own exit: stop building, leave the tree
+alone, write the blocker into the run file, and say what you need. No `Log`
+entry — memory records runs that finished.
 
 ### Check it still behaves
 
-`evals/scenarios.json` holds twenty-five scenarios: one per route, plus the
+`evals/scenarios.json` holds thirty scenarios: one per route, plus the
 failure modes that matter most — committing when it must not, *discarding
 uncommitted work* when it must not, over-routing a trivial change, and letting an
 unverified claim through. Run them by hand after any edit to a skill; see
@@ -450,6 +463,22 @@ Review and merge when ready — shipping does not merge.
 
 Note `base: main [from Standing]`. It did not ask, because a previous run
 already settled it. That is the memory doing its job.
+
+**The second `/shipping` is different.** Review comes back, you fix it, and you
+type it again — preflight finds the PR already open on this branch and switches
+to update mode. One short block, then `add`, `commit`, `push`, and the PR picks
+it up:
+
+```
+pr:      #43 Export user orders as CSV — https://github.com/you/repo/pull/43
+commit:  fix(api): quote fields containing delimiters
+files:   1 file, +6/-2
+verified: pytest -q → exit 0
+```
+
+No second issue, no second PR, and no `--force` or `--amend` — the last commit
+may be yours, but a reviewer may already have read it. A rejected push means
+someone else pushed to the branch; that is reported, not forced through.
 
 ### When memory disagrees with you
 

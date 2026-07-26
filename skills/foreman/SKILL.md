@@ -43,6 +43,9 @@ the questions on the load-bearing few that settle the rest. Budget: three.
 
 ## Phase 1 — Route
 
+*Runs on: every route. On **Trivial** it is one line naming the route — no
+checklist, no memory ceremony.*
+
 Read `.foreman/memory.md` if it exists — it is small, read it whole. It tells
 you what earlier runs settled and what they left behind. Where it contradicts
 the repo or the request, resolve that now by the grill rules in
@@ -91,6 +94,9 @@ bloat this pack exists to prevent, so route honestly.
 
 ## Phase 2 — Recon
 
+*Runs on: Build, Broken, Foggy, Learn. On **Learn** the deliverable is the
+trace, not census verdicts — see [`references/routes.md`](references/routes.md).*
+
 Recon looks two ways. **Inward**: what does this codebase already have.
 **Outward**: what does the world already have, when the job needs something the
 codebase cannot explain.
@@ -128,6 +134,9 @@ research not running.
 
 ## Phase 3 — Budget
 
+*Runs on: Build, Broken. **Foggy** posts the spec block below instead — it
+writes no code, so a line budget would be a number about nothing.*
+
 Before the first line of code, post the plan as one block. Nothing else.
 
 ```
@@ -145,6 +154,20 @@ The budget is a commitment phase 5 measures you against, so make it a real
 number. Both figures come from the census: a job with three reuses and one new
 function is not a 300-line job.
 
+**It counts lines you author.** Lockfiles, generated clients, migration
+scaffolds, snapshot updates, and formatter churn are diff you did not write, and
+folding them in makes the number meaningless in both directions — a dependency
+bump blows a budget it never spent, and 4,000 machine-written lines are a place
+to hide 200 hand-written ones. Budget the authored lines, and add one line to
+the block naming what you are setting aside and roughly how big it is:
+
+```
+Generated: package-lock.json (~3k lines, npm-generated)
+```
+
+Phase 5 measures the same split. What is set aside is still *reviewed* — the
+line that regenerated it was yours.
+
 `Excess:` is the escape hatch, and it is deliberately narrow — it takes a
 *named constraint*, not a preference. "Hand-rolling the retry because the
 installed client's backoff is not configurable" is a constraint. "Cleaner this
@@ -158,12 +181,47 @@ with it. The next session then opens on a half-built tree with no idea what was
 agreed. Same directory as memory, so the `*` in `.foreman/.gitignore` already
 covers it; phase 6 deletes it.
 
-*Done when:* the block is posted, every field is filled, and the run file
-exists. `Rung:` naming a rung the census contradicts — "build it fresh" when the census found a helper —
+### On Foggy: the spec block instead
+
+A Foggy run has no line count to commit to and nothing for phase 5 to measure,
+so it posts this and writes it to `.foreman/spec-<slug>.md`:
+
+```
+Goal:     <what the user is trying to achieve, in their words>
+Settled:  <decision> — <answer> (asked | derived from <source> | defaulted)
+Open:     <what is still undecided>, settled by <what would decide it>
+Parts:    <the pieces a Build run will census against>
+Risks:    <what would make this the wrong shape>
+Next:     Build route, fresh context, reads .foreman/spec-<slug>.md
+```
+
+**Foggy writes no run file.** Nothing is in flight — the run ends here, and the
+spec is the durable artifact. A run file would outlive the run and read to the
+next session as work abandoned mid-build, which is the exact signal phase 1
+acts on. One `Log` entry in phase 6 closes it out.
+
+### When the job changes under you
+
+A request that grows after the block is posted invalidates it. Phase 5 then
+measures real work against a budget for a smaller job and reports an overrun
+that is really a scope change — or the budget quietly stops meaning anything,
+which is worse.
+
+So when the user adds to the job mid-run: say in one line what was added, post
+the revised `Budget:` and `Check:` lines only, and amend the run file. Phase 5
+measures against the revision. What you may not do is absorb new scope silently
+and explain the overrun afterwards — a budget revised in the open is a
+commitment; one revised at the gate is an excuse.
+
+*Done when:* the block is posted, every field is filled, and the artifact
+exists — the run file on Build and Broken, the spec on Foggy. `Rung:` naming a
+rung the census contradicts — "build it fresh" when the census found a helper —
 fails the phase, unless `Excess:` names the constraint. Otherwise go back to
 phase 2's answer and take the higher rung.
 
 ## Phase 4 — Build
+
+*Runs on: Trivial, Build, Broken. It is the only phase **Trivial** runs.*
 
 Fan out on reads. Stay single on writes.
 
@@ -192,11 +250,16 @@ The ladder governs what you write. `defer:` every corner you cut, with its
 ceiling and its trigger. Run the project's typecheck and the single relevant
 test file as you go, and the full suite once at the end.
 
-*Done when:* the change works, the phase 3 check exists and passes, and the
-project's own checks are green. Report the actual result — a failing suite is
-reported as failing, with the output.
+*Done when:* the change works, the project's own checks are green, and — where
+phase 3 ran — the check it declared exists and passes. On Trivial there is no
+declared check to satisfy; the ladder still asks for one runnable check behind
+any non-trivial logic, and a typo has none. Report the actual result — a failing
+suite is reported as failing, with the output.
 
 ## Phase 5 — Gate
+
+*Runs on: Build, Broken, in full. **Judge** runs the review half only — see
+below. It is the only phase Judge runs.*
 
 **Verify before you review.** Reviewing a change nobody proved works is
 reviewing a hypothesis. Run the `verifying-work` gate first: name the claim,
@@ -220,6 +283,10 @@ not yours; counting them inflates the overrun and counting them as reviewed is
 worse. If the baseline is unavailable, say the figure is unverifiable rather than
 quoting a number you cannot attribute.
 
+Report the authored figure against the budget, and anything phase 3 listed under
+`Generated:` as a second number beside it — `+180/-40 (budget: ~150), plus ~3k
+generated`. One number that silently blends the two is not a measurement.
+
 | Outcome | Action |
 |---|---|
 | Verified, within budget, no findings | Ship. |
@@ -232,7 +299,29 @@ quoting a number you cannot attribute.
 applied, fixed, or waived in writing, and the final line count is stated
 against the budget.
 
+### On Judge: the review half only
+
+Judge reviews work it did not write, so two of this phase's steps have nothing
+to act on. **Skip the verification gate** — there is no claim of yours to prove
+and no proof command from this session; where the diff's own tests are missing,
+that is a `Correct` finding, not a gate you run. **Skip the budget measurement**
+— no phase 3 ran, so there is no figure to measure against, and the tree's line
+count is not an overrun. The outcome table does not apply either: Judge applies
+nothing and ships nothing.
+
+What Judge owes is the two reports, verbatim and unmerged, and the one closing
+line `lean-review` specifies. If a finding makes the fix obvious, offer it and
+stop.
+
+*Done when:* both axes have reported and neither report has been merged into
+the other.
+
 ## Phase 6 — Ledger
+
+*Runs on: Build, Broken, in full. **Foggy** runs the `Log` entry alone — it
+wrote no code, so there are no deferrals to harvest and no run file to delete.
+Its entry names the route and the spec path: `spec: .foreman/spec-<slug>.md`.
+**Judge** and **Learn** write nothing here; a report is not a run.*
 
 Harvest the deferrals so "later" cannot quietly become "never":
 
@@ -255,6 +344,38 @@ exactly the signal phase 1 acts on.
 
 *Done when:* the ledger is printed (or `no deferrals`), memory carries this run,
 and the run file is gone.
+
+## Stopping early
+
+Every phase above says when it is *done*. A run that cannot finish needs the
+other instruction, because the failure mode is not stopping — it is stopping
+untidily, leaving a half-built tree that the next session cannot tell from a
+finished one.
+
+A run stops when something outside the work blocks it: a credential you do not
+have, an upstream bug, a decision only the user can make, a check that cannot
+be made to pass without a choice you are not entitled to take.
+
+Then, in order:
+
+1. **Stop building.** A blocked run that keeps going produces speculative code
+   against an unsettled decision — the most expensive kind to unwind.
+2. **Leave the tree exactly as it is.** The working-tree rule is at its
+   sharpest here: do not revert your own partial work to "leave things clean"
+   unless the user asks. Half a feature is worth more than none, and it is
+   theirs to judge.
+3. **Write the blocker into `.foreman/run-<slug>.md`**, under the budget block:
+   what is done, what is not, what blocked it, and what would unblock it. This
+   is the file phase 1 reads, and the reason it exists.
+4. **Say all of it in the response too**, in three lines or fewer, ending with
+   the one thing you need from the user.
+
+Do not append a `Log` entry. Memory records runs that finished, and a blocked
+run has not — the run file is the record until it either resumes or is
+abandoned.
+
+*Done when:* the run file names the blocker, the tree is untouched since the
+last edit, and the user knows what you need.
 
 ## Signing off
 
