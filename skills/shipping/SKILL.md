@@ -41,7 +41,21 @@ Read `.foreman/memory.md`. Then check three things and stop on any of them:
 - **Secrets in the diff** — scan for `.env` files, key material, tokens, and
   credentials. One is a hard stop, not a warning.
 
-*Done when:* the change set is known, proven green, and clean of secrets.
+**The one case that does not hard-stop: there is no check to run.**
+`Standing.checks` is absent *and* the repo has nothing to read one from — no
+test script in the manifest, no CI workflow, no linter, nothing that could go
+red. A greenfield repo and a docs-only change both land here legitimately, and a
+gate that can never open is a gate people route around.
+
+Look before concluding it: a `test` script, `.github/workflows/`, a `Makefile`
+target, `pyproject.toml`'s dev dependencies. Find one → run it, and record it to
+`Standing.checks` so this is asked once. Find none → carry
+`verified: none — <reason>` into the plan block, name what a human would run
+instead, and let the user approve *that*. Never invent a command, and never
+report an absent check as a passing one.
+
+*Done when:* the change set is known, clean of secrets, and either proven green
+or explicitly carried as unverified with the reason.
 
 ## 2. Reconcile
 
@@ -74,8 +88,13 @@ base:    <target branch>            [from Standing, or asked now]
 branch:  <name, per Standing.branching>
 commit:  <message, per Standing.commits>
 files:   <N> files, <+A/-B>
+verified: <command> → exit <code>   [or: none — <reason>; a human must run <what>]
 pr:      <title> — Closes #<issue>
 ```
+
+`verified:` carries the command, never an adjective. It sits in the block the
+user approves precisely so that shipping unverified work is a thing they say yes
+to with their eyes open, rather than something the preflight waved through.
 
 Ask only what `Standing` does not already answer. If `base` is absent, this is
 the moment to ask it — once — and record it. A repo with an unusual base

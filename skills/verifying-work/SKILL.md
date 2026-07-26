@@ -65,9 +65,15 @@ no credentials, no device — say exactly that and name what a human must run.
 
 For any bug fix, the test must be shown to catch *this* bug:
 
-1. Run the new test **without** the fix — stash it, revert it, or comment it
-   out. The test must fail, and fail for the reported reason.
-2. Restore the fix. The test must pass.
+1. Run the new test **without** the fix. Reach for the reversal that discards
+   nothing: comment the fix out, or copy the file aside and put it back. Do
+   **not** `git stash`, `git checkout --`, or `git reset` a tree that holds work
+   this run did not write — the ladder's working-tree rule outranks the
+   convenience of a one-word reversal, and a stash is how unrelated uncommitted
+   work disappears. The test must fail, and fail for the reported reason.
+2. Restore the fix. The test must pass, and the file must be byte-identical to
+   what it was before step 1 — a botched restore is a second bug wearing a green
+   suite.
 3. Report both runs.
 
 A test that never went red is a test that will never tell you the bug came

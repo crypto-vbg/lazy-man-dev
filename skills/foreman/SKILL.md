@@ -49,6 +49,17 @@ the repo or the request, resolve that now by the grill rules in
 [`references/memory.md`](references/memory.md), before a route is chosen on a
 stale fact.
 
+**Record the starting point** before anything else: `git status --porcelain`.
+The diff phase 5 measures is *yours*, and on a tree that was already dirty the
+line count means nothing unless you know which entries predate you. Note them —
+everything in that list is outside your budget, outside your review, and outside
+what `/shipping` should stage.
+
+**A `.foreman/run-*.md` file means an earlier run stopped mid-flight.** Read it,
+compare its baseline against the tree as it stands now, and say in one line
+whether you are resuming that run or abandoning it. A stale run file plus a
+dirty tree is the state where work gets rebuilt on top of itself.
+
 If this run implements an agreement an earlier **Foggy** run left behind, read
 its `.foreman/spec-<slug>.md` now too. That file is the parts list phase 2
 censuses against and the yardstick phase 5 checks for drift — an implementation
@@ -107,7 +118,11 @@ The census comes back as evidence, not opinion:
 
 *Done when:* every part of the job maps to a reuse, an extension, or an
 explicit "nothing exists". A census that returns no file paths has not run —
-send it back. Where `researching` ran, it has named a version, a
+send it back **once**, naming the parts it skipped. If the second attempt still
+comes back pathless, stop dispatching: either the repo genuinely has nothing, or
+the job was never split into searchable parts. Say which, record every part as
+`none` yourself, and move on — a third census is a loop, not diligence. Where
+`researching` ran, it has named a version, a
 recommendation, and its unknowns; an unknown left unstated is worse than the
 research not running.
 
@@ -135,8 +150,16 @@ function is not a 300-line job.
 installed client's backoff is not configurable" is a constraint. "Cleaner this
 way" is not. An empty `Excess:` line is the normal case; write `none`.
 
-*Done when:* the block is posted and every field is filled. `Rung:` naming a
-rung the census contradicts — "build it fresh" when the census found a helper —
+**Then write that block to `.foreman/run-<slug>.md`, with the phase 1 baseline
+under it.** Everything the remaining phases measure against — the census, the
+budget, the declared check, the pre-existing dirt — exists only in this
+conversation until you do, and a context that resets at phase 4 takes all of it
+with it. The next session then opens on a half-built tree with no idea what was
+agreed. Same directory as memory, so the `*` in `.foreman/.gitignore` already
+covers it; phase 6 deletes it.
+
+*Done when:* the block is posted, every field is filled, and the run file
+exists. `Rung:` naming a rung the census contradicts — "build it fresh" when the census found a helper —
 fails the phase, unless `Excess:` names the constraint. Otherwise go back to
 phase 2's answer and take the higher rung.
 
@@ -191,7 +214,11 @@ defines both briefs and the aggregation format.
 They run in parallel and report separately, because a change can pass one and
 fail the other, and a merged report lets the passing axis mask the failing one.
 
-Then measure the diff against phase 3:
+Then measure the diff against phase 3 — **against the phase 1 baseline, not
+against the whole tree.** Entries that were already dirty when you started are
+not yours; counting them inflates the overrun and counting them as reviewed is
+worse. If the baseline is unavailable, say the figure is unverifiable rather than
+quoting a number you cannot attribute.
 
 | Outcome | Action |
 |---|---|
@@ -222,8 +249,12 @@ actual, the proof command and its exit code, what was reused, the deferral
 count — plus any `Standing` field this run settled. One entry per completed
 run; memory is a ledger, not a diary.
 
-*Done when:* the ledger is printed (or `no deferrals`), and memory carries this
-run.
+Then delete `.foreman/run-<slug>.md`. The `Log` entry supersedes it, and a run
+file left behind reads as an interrupted run to the next session — which is
+exactly the signal phase 1 acts on.
+
+*Done when:* the ledger is printed (or `no deferrals`), memory carries this run,
+and the run file is gone.
 
 ## Signing off
 

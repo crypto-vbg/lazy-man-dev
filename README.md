@@ -65,7 +65,7 @@ lazy-man-dev/
 │   ├── verifying-work/SKILL.md    evidence gate on any completion claim
 │   └── shipping/SKILL.md          issue → branch → commit → PR. YOU type this
 ├── evals/
-│   ├── scenarios.json             17 scenarios: routing + guardrails
+│   ├── scenarios.json             25 scenarios: routing + guardrails
 │   └── README.md                  how to run and score them
 └── hooks/
     ├── foreman-subagent.js        injects the ladder into every sub-agent
@@ -93,6 +93,28 @@ no skill can call it, and it refuses to run on work whose checks have not
 passed in this session. It also never uses `--force`, `--no-verify`, or
 `--amend` on pushed commits, and never commits onto the base branch.
 
+### The other half: your working tree
+
+History is the recoverable half — an unwanted commit is one `reflog` away. The
+sharper rule covers the work that has no history yet, because **uncommitted work
+a command discarded is simply gone.** So `git reset --hard`, `checkout --`,
+`checkout -B`, `restore`, `stash`, `clean`, `revert`, `rebase`, and `branch -D`
+never run on the agent's own initiative.
+
+What decides it is whose work is at risk. It runs `git status --porcelain` first:
+anything in the tree that this run did not write makes the whole class
+off-limits — it names the command it wants and stops. Its own edits it may
+reverse, saying which and why. Proving a test goes red therefore comments the fix
+out rather than stashing over your work.
+
+Branch switches count, and this is the one that bites: `git checkout -B` resets
+the tree to its start point and discards local modifications **even when the two
+trees are identical**. Uncommitted work gets committed on the branch it was
+written on, before anything switches.
+
+Additive git discards nothing and is always fine: `init`, `add`, `checkout -b`,
+`worktree add`.
+
 ## Memory
 
 `.foreman/memory.md` in your repo, gitignored by a `*` file inside `.foreman/`
@@ -106,6 +128,13 @@ so the project's own `.gitignore` stays untouched. Two sections:
 
 `foreman` reads it at phase 1 and appends at phase 6; `shipping` reads it at
 preflight and records the PR.
+
+Memory is a ledger of what *finished*, so a run still in flight lives next to it
+in `.foreman/run-<slug>.md` — phase 3's budget block plus the `git status` the run
+started from. That file is what makes a run survive a context reset: reopen the
+work and phase 1 finds the budget, the declared check, and which files were
+already dirty before it began. Phase 6 deletes it when the `Log` entry lands, so a
+run file lying around *is* the signal that something was interrupted.
 
 **On conflict, it grills.** Memory says `main`, you say staging → it states the
 contradiction in one line, asks **one** question with a recommended answer,
@@ -228,7 +257,8 @@ Invoke a piece directly when that is all you want:
 
 1. **Route** — read memory, pick one of six routes, post its checklist.
 2. **Recon** — census sub-agent finds what already exists; you trace the callers.
-3. **Budget** — post files, net lines, ladder rung, and the check, before coding.
+3. **Budget** — post files, net lines, ladder rung, and the check, before
+   coding; persist them so a reset context can still measure against them.
 4. **Build** — fan out on reads, stay single on writes.
 5. **Gate** — verify with a real command, then `Correct` ∥ `Lean` sub-agents;
    measure the diff against the budget.
@@ -243,10 +273,11 @@ pack exists to prevent.
 
 ### Check it still behaves
 
-`evals/scenarios.json` holds seventeen scenarios: one per route, plus the three
-failure modes that matter most — committing when it must not, over-routing a
-trivial change, and letting an unverified claim through. Run them by hand after
-any edit to a skill; see `evals/README.md`.
+`evals/scenarios.json` holds twenty-five scenarios: one per route, plus the
+failure modes that matter most — committing when it must not, *discarding
+uncommitted work* when it must not, over-routing a trivial change, and letting an
+unverified claim through. Run them by hand after any edit to a skill; see
+`evals/README.md`.
 
 ## Walkthrough
 

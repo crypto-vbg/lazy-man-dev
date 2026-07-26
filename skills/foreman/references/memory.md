@@ -17,9 +17,16 @@ without editing the project's own `.gitignore`.
 
 Memory is working state, not a deliverable. It is never committed.
 
-The same directory also holds any `spec-<slug>.md` a Foggy run persisted (see
-[`routes.md`](routes.md)) — the `*` gitignore covers those too. Like memory,
-they are working state the Build route reads on re-entry, not deliverables.
+The same directory also holds two other kinds of working state, both covered by
+the same `*` gitignore, and neither of them is memory:
+
+- `spec-<slug>.md` — what a Foggy run settled (see [`routes.md`](routes.md)).
+  The Build route reads it on re-entry.
+- `run-<slug>.md` — the live run: phase 3's budget block plus phase 1's
+  `git status --porcelain` baseline. It exists only while a run is in flight and
+  phase 6 deletes it.
+
+Neither is a deliverable, and neither is committed.
 
 ## Standing — durable answers, asked once
 
@@ -88,6 +95,11 @@ Write at two moments only, so the file stays a ledger rather than a diary:
 
 Never log intentions, plans, or in-progress notes. An entry describes
 something that finished.
+
+That rule is about **this file**, and it is why in-flight state lives in
+`run-<slug>.md` instead. A budget nobody has met yet does not belong in a ledger
+of what happened; it does belong somewhere a reset context can find it. Two
+files, two lifetimes — the run file is deleted when its `Log` entry is written.
 
 ## When memory and reality disagree
 

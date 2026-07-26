@@ -38,6 +38,12 @@ Where `to-tickets` is installed and the spec became GitHub issues, those are the
 durable record instead — say which you wrote. A spec that lives only in the chat
 is lost the moment the context resets.
 
+**An existing `spec-<slug>.md` is a fact to reconcile, not a file to overwrite.**
+Read it first. Where it contradicts what was just agreed, grill by
+[`memory.md`](memory.md)'s conflict rules — state the contradiction in one line,
+ask one question — before rewriting anything. Silently replacing a spec discards
+a decision the user already made, and they will not know it happened.
+
 When the fog clears, re-enter at phase 1 on the **Build** route with a fresh
 context and point it at that spec. Phase 1 reads it as it reads memory; it is
 the parts list phase 2 censuses against and the yardstick phase 5 checks for
@@ -57,6 +63,25 @@ requires vocabulary the user has not used, that is unfamiliar fog: run
 
 **Judge and Learn write nothing.** They report. If the report makes the fix
 obvious, offer it — don't apply it unasked.
+
+**Learn answers with a path, not a verdict.** Phase 2 is the right phase but its
+default instruments have the wrong output shape: the census reports reuse
+verdicts and `researching` reports ranked options, and neither of those answers
+"what calls `Z`". On this route the deliverable is **the trace** — entry point →
+the symbol → every caller, each as `<path>:<symbol>`, with one line on what the
+subsystem does and one on where a change would land. Reach for the census only
+when the question is really "do we already have one of these", and for
+`researching` when it is "what even *is* X" — its `concept:` block is the answer
+there.
+
+**Undo is not a route.** Two different requests hide under it. Discarding
+*uncommitted* work follows the ladder's working-tree rule: check
+`git status --porcelain`, and if the tree holds anything this run did not write,
+name the command and stop. Undoing *committed* work — a revert, a reset, a closed
+PR — is a history write, so no route performs it: name the exact command
+(`git revert <sha>`, `gh pr close <n>`) and let the user run it. Building the
+*forward* fix that supersedes a bad commit is a normal **Broken** or **Build**
+run, and usually the better answer.
 
 ## Optional: composing with other packs
 

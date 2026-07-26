@@ -49,6 +49,39 @@ so and stop; the user decides.
 Read-only git is always fine and often required: `status`, `diff`, `log`,
 `branch --show-current`, `blame`, `rev-parse`.
 
+## The working tree is the user's too
+
+The rule above is about history. This one is about the work that has no history
+yet, and it is the sharper of the two: an unwanted commit can be undone from the
+reflog and a PR can be closed, but **uncommitted work that a command discarded
+is gone.**
+
+So this class never runs on your own initiative:
+
+`git reset --hard`, `git checkout -- <path>`, `git checkout -B`, `git restore`,
+`git stash`, `git clean`, `git revert`, `git rebase`, `git branch -D`.
+
+What decides it is *whose* work is at risk, not which command it is. Run
+`git status --porcelain` first:
+
+- The tree holds anything this run did not write → **none of them run.** Name
+  the command you want and why, and stop. The user decides.
+- The tree holds only edits from this run → it is yours to reverse. Say which
+  command and why, in one line.
+
+Switching branches counts. `git checkout -B` and `git switch -C` reset the tree
+to their start point and discard local modifications even when the trees look
+identical — if uncommitted work exists, commit it first, on the branch it was
+written on.
+
+Prefer the route that discards nothing. Proving a test goes red needs a build
+without the fix, and commenting the fix out or copying the file aside gets there
+without putting anyone else's work through a stash — see `verifying-work`.
+
+Additive git discards nothing and is always fine: `git init`, `git add`,
+`git checkout -b` (new branch, no `-B`), `git worktree add`, plus the read-only
+set above.
+
 ## Production non-negotiables
 
 Minimal is the shape of the solution, never the standard of the work. Build
