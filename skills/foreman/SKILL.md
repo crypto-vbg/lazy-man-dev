@@ -56,7 +56,7 @@ stale fact.
 The diff phase 5 measures is *yours*, and on a tree that was already dirty the
 line count means nothing unless you know which entries predate you. Note them —
 everything in that list is outside your budget, outside your review, and outside
-what `/shipping` should stage.
+what the `shipping` skill should stage.
 
 **A `.foreman/run-*.md` file means an earlier run stopped mid-flight.** Read it,
 compare its baseline against the tree as it stands now, and say in one line
@@ -391,7 +391,8 @@ skipped: <X>, add when <Y>.
 claim; `pytest -q → exit 0` is evidence.
 
 Then hand over. The change sits in the working tree, uncommitted, and the next
-move is the user's: `/shipping` opens the issue, branch, commit, and PR. Name
+move is the user's: the `shipping` skill opens the issue, branch, commit, and
+PR — they invoke it. Name
 it as their next step — do not take it.
 
 A feature tour of code the user can read is the one deliverable nobody asked

@@ -63,7 +63,7 @@ report an absent check as a passing one.
   again means one more commit on top and a push. It does **not** mean a second
   issue and a second PR for work already under review.
 
-Review feedback is the ordinary case here, and the first `/shipping` of a piece
+Review feedback is the ordinary case here, and the first shipping run of a piece
 of work is rarely the last. A closed or merged PR is not update mode — that is
 new work on a finished thread, so it takes the new path, and step 2 grills the
 contradiction if memory says otherwise.

@@ -8,13 +8,14 @@ that discipline as an agent workflow — you describe the job, `foreman` routes
 it, dispatches the sub-agents, and refuses to hand back more code than the job
 needed.
 
-```powershell
-git clone https://github.com/crypto-vbg/lazy-man-dev.git
-node lazy-man-dev/install.js
+```
+/plugin marketplace add crypto-vbg/lazy-man-dev
+/plugin install lazy-man-dev@lazy-man-dev
 ```
 
-That links six skills, wires the sub-agent hook, and runs the doctor. If it
-says `READY — full capacity`, you are done.
+Type those in Claude Code, then start a new session. Six skills and the
+sub-agent hook arrive together; nothing is written to your `settings.json`.
+Prefer a clone you can edit? [Install from source](#install-from-source).
 
 **That is the entire install.** There is no second pack to fetch. The skills
 named in `routes.md` — `grilling`, `implement`, `ponytail`, and the rest — are
@@ -49,7 +50,10 @@ delegates to them when they are.
 
 ```
 lazy-man-dev/
-├── install.js                     one command: link, wire, verify
+├── .claude-plugin/
+│   ├── plugin.json                manifest — the plugin install route
+│   └── marketplace.json           this repo is its own marketplace
+├── install.js                     the source route: link, wire, verify
 ├── doctor.js                      is it ready? every failure names its fix
 ├── skills/
 │   ├── foreman/
@@ -69,6 +73,7 @@ lazy-man-dev/
 │   └── README.md                  how to run and score them
 └── hooks/
     ├── foreman-subagent.js        injects the ladder into every sub-agent
+    ├── hooks.json                 how the plugin route wires that hook
     └── settings-snippet.json      manual wiring, if you skip the installer
 ```
 
@@ -174,12 +179,52 @@ answered. Full discipline in `skills/foreman/references/asking.md`.
 
 ## Install
 
+Two routes. Both deliver the same six skills and the same hook — pick one, not
+both, or every skill ends up defined twice.
+
+| | Plugin | From source |
+|---|---|---|
+| Install | `/plugin marketplace add crypto-vbg/lazy-man-dev` then `/plugin install lazy-man-dev@lazy-man-dev` | `git clone` + `node install.js` |
+| Your `settings.json` | untouched | hook wired in, backed up first |
+| Update | `/plugin marketplace update` | `git pull` |
+| Uninstall | `/plugin uninstall lazy-man-dev` | `node install.js --uninstall` |
+| Editing a skill | needs a reinstall | immediate — it is a link |
+| Skill names | `/lazy-man-dev:foreman` | `/foreman` |
+
+Node 14+ is the prerequisite either way: the `SubagentStart` hook is a Node
+script in both routes. On Windows the plugin hook is guarded, so a machine
+without `node` on `PATH` degrades quietly instead of erroring on every
+sub-agent spawn — but sub-agents stop inheriting the ladder, and `node
+doctor.js` will say so.
+
+### Plugin
+
+```
+/plugin marketplace add crypto-vbg/lazy-man-dev
+/plugin install lazy-man-dev@lazy-man-dev
+/reload-plugins
+```
+
+The marketplace lives in this same repo, so those two names being identical is
+not a typo: `<plugin>@<marketplace>`. `hooks/hooks.json` ships inside the
+plugin and resolves through `${CLAUDE_PLUGIN_ROOT}`, which is why nothing needs
+to be written into your settings.
+
+Plugin skills are namespaced — `/lazy-man-dev:shipping`, not `/shipping`.
+Automatic invocation is unaffected; foreman still routes and dispatches on its
+own. Only what *you* type changes.
+
+### Install from source
+
+Choose this if you want to edit the skills and see it take effect without
+reinstalling.
+
 ```bash
 git clone https://github.com/crypto-vbg/lazy-man-dev.git
 node lazy-man-dev/install.js
 ```
 
-Node 14+ is the only prerequisite. The installer links the six skills into
+The installer links the six skills into
 `~/.claude/skills/`, wires the `SubagentStart` hook into `~/.claude/settings.json`
 (backing it up first, and preserving every key already there), then runs the
 doctor and prints a verdict.
@@ -212,6 +257,12 @@ Mode; if the OS still refuses, it falls back to a copy and says so.
 node doctor.js          # add --project if you installed there
 ```
 
+The doctor reads the skills sitting next to it, so it is right whether that is
+your clone or the copy Claude Code cached when you installed the plugin. It
+never tells a plugin user to run `install.js`, or the reverse. Installed the
+plugin and have no clone? `/plugin` shows the same install state; clone the
+repo if you want the full report.
+
 Three verdicts, exit 1 on any failure:
 
 ```
@@ -228,12 +279,20 @@ Every non-ok line prints the command that fixes it. What it actually verifies:
   git guardrail checked *structurally* rather than trusted. If it ever reads
   `[FAIL] shipping is model-invocable — the git guardrail is OPEN`, an agent
   can ship on its own; treat it as blocking.
-- The hook is wired, the path in `settings.json` still resolves, the hook
-  **executes**, and its payload still contains the git prohibition. A hook that
-  runs but emits the wrong thing is the silent failure worth catching.
+- **Something actually delivers the skills to Claude Code** — the plugin, or a
+  classic install, or both. Either alone passes; only neither fails. It also
+  warns when *both* are live, because then all six skills are defined twice and
+  which copy answers is not yours to decide.
+- The hook is wired, the path still resolves, the hook **executes**, and its
+  payload still contains the git prohibition. A hook that runs but emits the
+  wrong thing is the silent failure worth catching. For the plugin route this
+  means `hooks/hooks.json` exists, goes through `${CLAUDE_PLUGIN_ROOT}` rather
+  than an absolute path, and keeps its Windows `node` guard.
+- `marketplace.json` parses and its entry name matches `plugin.json`. Nothing
+  reads that file after install, so a broken one fails only for new users.
 - `foreman`'s three reference files exist — without them it runs degraded.
 - `git`, and `gh` authenticated. Missing `gh` warns rather than fails: it only
-  blocks `/shipping`.
+  blocks `shipping`.
 
 ## Use
 
@@ -244,7 +303,8 @@ single obvious edit, and announces its route:
 Route: Build — new endpoint, fits one session.
 ```
 
-Invoke a piece directly when that is all you want:
+Invoke a piece directly when that is all you want — on the plugin route prefix
+each with `lazy-man-dev:`, so `/lazy-man-dev:reuse-census`:
 
 - `/reuse-census` — "does this repo already do X?"
 - `/researching` — "what even *is* X, and which version applies here?"
@@ -565,10 +625,12 @@ that:
 | `ReferenceError: require is not defined in ES module scope` | You are on a version before 1.0.1, cloned inside a project whose `package.json` has `"type": "module"` — Node walks up and finds that one | `git pull`. The repo now ships its own `package.json` pinning it to CommonJS. Better still, clone it outside the project |
 | Skills do not appear at all | Hooks and skills load at session start | Start a new session |
 | `foreman` never fires on its own | Another skill's description is winning, or the request looked trivial | Type `/foreman` and check `evals/scenarios.json` still passes |
-| Sub-agents ignore the ladder | Hook not wired, or `node` not on `PATH` when Claude Code launched | `node doctor.js`, then re-run `node install.js` |
-| `/shipping` cannot open a PR | `gh` missing or unauthenticated | `winget install GitHub.cli` then `gh auth login` |
-| Edits to a skill do nothing | You installed with `--copy` | Re-run `node install.js` (drop `--copy` to link instead) |
-| `settings.json` looks wrong | The installer backs up before writing | Restore `~/.claude/settings.json.bak` |
+| Sub-agents ignore the ladder | Hook not wired, or `node` not on `PATH` when Claude Code launched | `node doctor.js`, then re-run `node install.js` — or `/plugin install` again |
+| `shipping` cannot open a PR | `gh` missing or unauthenticated | `winget install GitHub.cli` then `gh auth login` |
+| Edits to a skill do nothing | You installed with `--copy`, or you installed the plugin — it runs from a cached copy, not your clone | Re-run `node install.js` (drop `--copy` to link instead). On the plugin route, edit and reinstall, or switch to the source install |
+| `/foreman` is not found, only `/lazy-man-dev:foreman` | Plugin skills are namespaced | Not a fault — use the namespaced name, or install from source |
+| Every skill appears twice | Plugin *and* classic install are both live | Drop one: `/plugin uninstall lazy-man-dev` or `node install.js --uninstall` |
+| `settings.json` looks wrong | The installer backs up before writing | Restore `~/.claude/settings.json.bak`. The plugin route never writes there |
 
 Two known limits, neither fixed:
 

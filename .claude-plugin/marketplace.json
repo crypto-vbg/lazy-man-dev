@@ -1,0 +1,14 @@
+{
+  "name": "lazy-man-dev",
+  "owner": {
+    "name": "crypto-vbg",
+    "url": "https://github.com/crypto-vbg"
+  },
+  "plugins": [
+    {
+      "name": "lazy-man-dev",
+      "source": "./",
+      "description": "One skill you call. It routes the task, dispatches sub-agents, and refuses to hand back more code than the job needed."
+    }
+  ]
+}

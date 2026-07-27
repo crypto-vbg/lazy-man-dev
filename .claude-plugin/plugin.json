@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "lazy-man-dev",
+  "displayName": "lazy man dev",
+  "version": "1.1.0",
+  "description": "One skill you call. It routes the task, dispatches sub-agents, and refuses to hand back more code than the job needed.",
+  "author": {
+    "name": "crypto-vbg",
+    "url": "https://github.com/crypto-vbg"
+  },
+  "homepage": "https://github.com/crypto-vbg/lazy-man-dev#readme",
+  "repository": "https://github.com/crypto-vbg/lazy-man-dev",
+  "license": "MIT",
+  "keywords": ["foreman", "code-review", "sub-agents", "reuse", "least-code"]
+}

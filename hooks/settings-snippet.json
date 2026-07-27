@@ -1,5 +1,5 @@
 {
-  "_comment": "Manual fallback — `node install.js` writes this for you with the real path filled in. Wiring it by hand: replace <REPO> with the absolute path to your lazy-man-dev clone, then merge the \"hooks\" key into ~/.claude/settings.json, adding to an existing hooks object rather than replacing it. The path is absolute because ${CLAUDE_PLUGIN_ROOT} only resolves inside an installed plugin.",
+  "_comment": "Manual fallback for the SOURCE install only — `node install.js` writes this for you with the real path filled in. Wiring it by hand: replace <REPO> with the absolute path to your lazy-man-dev clone, then merge the \"hooks\" key into ~/.claude/settings.json, adding to an existing hooks object rather than replacing it. The path is absolute because ${CLAUDE_PLUGIN_ROOT} only resolves inside an installed plugin. If you installed the plugin instead, ignore this file: hooks/hooks.json ships with the plugin and wires the same hook through ${CLAUDE_PLUGIN_ROOT}, and nothing needs to go into settings.json.",
   "hooks": {
     "SubagentStart": [
       {
