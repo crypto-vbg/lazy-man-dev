@@ -5,7 +5,7 @@
     "query": "There's a typo in the button label in src/components/Login.tsx — 'Sgin in' should be 'Sign in'.",
     "expected_behavior": [
       "Routes to Trivial and says so, because the user named the file and the change is one string",
-      "Runs phase 4 only — no reuse census, no budget block, no two-agent review",
+      "Phase 1 is one line plus the two baseline reads, then phase 4 — no reuse census, no budget block, no two-agent review",
       "Makes the edit and stops; total response is short"
     ],
     "fails_if": "It posts a budget block or dispatches a census sub-agent for a one-word change."
@@ -29,7 +29,7 @@
       "Routes to Build",
       "Dispatches a reuse census sub-agent BEFORE writing any code",
       "Census report names actual file:symbol paths, or an explicit 'none' per part",
-      "Posts a budget block with files, net lines, ladder rung, and the one check, before the first edit",
+      "Posts a budget block with files, lines added, ladder rung, and the one check, before the first edit",
       "Uses an existing CSV helper or a stdlib csv module rather than hand-rolling escaping"
     ],
     "fails_if": "Any code is written before the census returns, or the census returns prose with no paths."
@@ -65,7 +65,7 @@
     "skills": ["foreman", "lean-review"],
     "query": "Is this branch over-engineered? Compare against main.",
     "expected_behavior": [
-      "Routes to Judge, phase 5 only",
+      "Routes to Judge — phase 1 names it, phase 5 does the work",
       "Confirms the ref resolves and the diff is non-empty before spawning anything",
       "Spawns Correct and Lean as two parallel sub-agents in one message",
       "Reports both under separate headings, verbatim, without merging or re-ranking",
@@ -280,7 +280,7 @@
     "skills": ["foreman", "reuse-census"],
     "query": "How does session invalidation work in this codebase, and what calls it?",
     "expected_behavior": [
-      "Routes to Learn, phase 2 only, and writes no code",
+      "Routes to Learn — phase 1 names it, phase 2 does the work — and writes no code",
       "Delivers a trace: entry point → the symbol → every caller, each as path:symbol",
       "Reports in trace shape, NOT as reuse/extend/none verdicts — a census verdict does not answer 'what calls Z'",
       "Adds one line on what the subsystem does and where a change would land",
@@ -376,6 +376,66 @@
     "note": "Both failure directions matter; the second is how a budget stops being a constraint at all."
   },
   {
+    "id": "user-spec-becomes-tickets",
+    "skills": ["foreman", "ticketing"],
+    "query": "I've written SPEC.md for the new billing module. Let's get going.",
+    "expected_behavior": [
+      "Reads SPEC.md before choosing a route, and routes to Foggy — a spec bigger than one session is fog already cleared, not a Build",
+      "Does not interview the user about decisions the spec already settles; asks only about the holes in it",
+      "Reconciles the spec against the repo: confirms the files, symbols, and dependencies it names still exist, and grills any contradiction in one line",
+      "Slices it into tickets in .foreman/tickets/<n>-<slug>.md, each with Goal, Parts, Fanout, Depends, Check, Spec",
+      "Posts the board and STOPS — writes no implementation code and picks no ticket",
+      "Cites SPEC.md's path in the tickets rather than copying the user's spec into .foreman/"
+    ],
+    "fails_if": "It starts building ticket 1 without being asked, or interviews the user about choices the spec already made, or leaves the tickets only in the chat.",
+    "note": "The pick is the load-bearing handoff: a route that writes no code does not get to choose which code gets written first."
+  },
+  {
+    "id": "ticket-carries-its-own-fanout",
+    "skills": ["ticketing"],
+    "query": "Slice this spec into tickets I can work through.",
+    "expected_behavior": [
+      "Slices vertically — each ticket leaves the tree working and carries a check that passes on its own",
+      "Does NOT slice by layer (a schema ticket, an API ticket, a UI ticket), which defers every check to the last ticket",
+      "Writes a Fanout: line on every ticket, naming what a sub-agent carries and the seam that separates it, with a completion criterion and a word budget",
+      "Writes 'none — single writer' where no real seam exists, rather than inventing one",
+      "Puts an unsettled decision on the ticket's Open: line and says it wants an interview, instead of encoding a guess",
+      "Orders tickets so the earliest unblocks the most, and states Depends: explicitly"
+    ],
+    "fails_if": "Tickets are layer-sliced so none can be verified alone, or every ticket claims parallel sub-agents when the work touches one file."
+  },
+  {
+    "id": "picked-ticket-drives-the-build",
+    "skills": ["foreman"],
+    "query": "Do ticket 3.",
+    "expected_behavior": [
+      "Reads .foreman/tickets/3-<slug>.md at phase 1 and sets State: building before starting",
+      "Censuses against the ticket's Parts: rather than re-deriving the job from the spec",
+      "Takes the declared check from the ticket's Check: line at phase 3",
+      "Dispatches the fan-out the ticket already named, and says so in one line if it dispatches something different",
+      "Builds ticket 3 only — does not pull in ticket 4 because it is adjacent",
+      "At phase 6 sets State: done, names the ticket in the Log entry, and reprints the board",
+      "Stops there: the next ticket is the user's pick, not its next move"
+    ],
+    "fails_if": "It re-slices the spec, builds more than the one ticket it was given, or leaves State: building on a finished ticket — which the next session reads as work in flight.",
+    "note": "Same leak as a stale run file, one file over."
+  },
+  {
+    "id": "greenfield-census-returns-none",
+    "skills": ["foreman", "reuse-census"],
+    "query": "Empty repo. Build me a CLI that renames files in bulk from a regex.",
+    "expected_behavior": [
+      "Runs the census anyway and reports every part as 'none' — a complete census, not a skipped one",
+      "Still reads the manifest: an already-installed dependency outranks anything hand-written, even on day one",
+      "Closes with 'house style: none — greenfield' rather than padding the report with near-misses",
+      "Names rung 3-5 in the budget block — the stdlib's own path and regex modules — since rung 2 is genuinely empty",
+      "Writes one working file rather than a package layout, base classes, or a config layer for a second caller that does not exist",
+      "Leaves the first implementation plainly written and where it will be looked for, because it becomes the pattern the next census finds"
+    ],
+    "fails_if": "It treats an empty census as licence to scaffold a framework, or skips the census because the repo is new, or reaches for a dependency the stdlib covers.",
+    "note": "The mirror of the reuse rung: with nothing to reuse, the discipline has to come from the rungs below it."
+  },
+  {
     "id": "undo-is-named-not-performed",
     "skills": ["foreman"],
     "query": "That last commit broke prod. Revert it.",
@@ -386,5 +446,46 @@
       "Reads git log to identify the commit rather than asking which one"
     ],
     "fails_if": "It writes to git history, or it treats a revert request as unroutable and does nothing useful."
+  },
+  {
+    "id": "stale-ticket-board-does-not-hijack",
+    "skills": ["foreman", "ticketing"],
+    "query": "Typo in the footer: 'Copyirght' should be 'Copyright' in src/components/Footer.tsx.",
+    "setup": ".foreman/tickets/ holds four tickets from an unrelated Foggy run last month; none of them mentions the footer.",
+    "expected_behavior": [
+      "Routes to Trivial and makes the edit",
+      "Says nothing about the ticket board — the request is unrelated to the sliced work",
+      "Does not post the board and does not stop to ask which ticket to pick"
+    ],
+    "fails_if": "It prints the ticket board and halts, or asks the user to pick a ticket, because .foreman/tickets/ merely exists.",
+    "note": "The board governs requests asking for the sliced work, not every request that follows it. Failing closed here costs the user a one-line fix."
+  },
+  {
+    "id": "gate-reviews-the-working-tree",
+    "skills": ["foreman", "lean-review"],
+    "query": "Add a --dry-run flag to the import command.",
+    "expected_behavior": [
+      "Builds it and leaves the change uncommitted, as the working-tree rule requires",
+      "At phase 5, scopes the review as git diff HEAD plus the untracked files this run wrote — not a ref range",
+      "Does not ask the user for a fixed point or a base ref; there are no commits to diff against",
+      "Does not fall back to a whole-repo audit, which would drop the Correct axis",
+      "Names the phase 1 baseline paths as out of scope so pre-existing dirt is not reviewed as this run's work",
+      "Both axes report separately on the diff that was actually built"
+    ],
+    "fails_if": "It runs git diff main...HEAD, gets an empty diff, and reports nothing to review — or asks for a ref, or silently audits the whole tree with only the Lean axis.",
+    "note": "foreman never commits, so every phase 5 hands lean-review uncommitted work. A scope step that only knows ref ranges breaks on the pack's most common run."
+  },
+  {
+    "id": "budget-counts-added-not-net",
+    "skills": ["foreman"],
+    "query": "Refactor the notification service to use the new template helper.",
+    "expected_behavior": [
+      "Declares the budget in lines added",
+      "At phase 5, compares the added lines against the budget and reports deletions beside that figure, never netted into it",
+      "A change that deletes 200 lines and adds 180 is reported as 180 spent against the budget, not as -20",
+      "Subtracts the phase 1 numstat baseline per file, so a file that was already dirty is attributed correctly"
+    ],
+    "fails_if": "It nets deletions off the additions to claim it came in under budget, or counts pre-existing dirty lines as its own.",
+    "note": "Netting is how a large rewrite passes a small budget while looking disciplined."
   }
 ]

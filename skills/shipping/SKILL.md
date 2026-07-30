@@ -116,6 +116,13 @@ Ask only what `Standing` does not already answer. If `base` is absent, this is
 the moment to ask it — once — and record it. A repo with an unusual base
 (`develop`, `staging`) must be asked, never inferred from what looks default.
 
+**Where the run built a ticket, the issue is already written.** The `Log` entry
+names it, and `.foreman/tickets/<n>-<slug>.md` holds a title, a `Goal:`, and a
+`Check:` — better copy than anything re-derived from a diff, and it keeps the
+issue speaking the same language as the plan the user picked from. Cite the
+ticket number in the body. Do not ship the ticket file itself; it is working
+state, and the board is not a deliverable.
+
 **Update mode posts the shorter block**, because everything the long one asks
 has already been answered and approved once:
 

@@ -57,9 +57,12 @@ const routes = {};
 for (const r of runs) routes[r.route] = (routes[r.route] || 0) + 1;
 
 const withBudget = runs.filter(r => r.budget != null && r.added != null);
-const netOf = (r) => r.added - r.removed;
+// Added lines only, never added-minus-removed: the budget is declared in added
+// lines, and netting them lets a refactor that deletes 200 and adds 180 report
+// -20 against a 40-line budget.
 const totalBudget = withBudget.reduce((s, r) => s + r.budget, 0);
-const totalActual = withBudget.reduce((s, r) => s + netOf(r), 0);
+const totalActual = withBudget.reduce((s, r) => s + r.added, 0);
+const totalRemoved = withBudget.reduce((s, r) => s + (r.removed || 0), 0);
 
 const reusedRuns = runs.filter(r => r.reused && !/^none$/i.test(r.reused)).length;
 const verifiedRuns = runs.filter(r => r.verified).length;
@@ -78,6 +81,6 @@ if (withBudget.length) {
     : ratio < 0.85 ? 'runs UNDER — budgets are padded'
     : 'tracks budget well';
   console.log(`\nbudget vs actual (${withBudget.length} run${withBudget.length > 1 ? 's' : ''} with both figures):`);
-  console.log(`  budgeted ~${totalBudget} net lines, actual ${totalActual} — ${Math.round(ratio * 100)}% of budget, ${verdict}.`);
+  console.log(`  budgeted ~${totalBudget} lines added, actual ${totalActual} added (${totalRemoved} removed, not netted off) — ${Math.round(ratio * 100)}% of budget, ${verdict}.`);
 }
 console.log();

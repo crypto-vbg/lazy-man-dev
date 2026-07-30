@@ -13,7 +13,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const SKILLS = ['foreman', 'reuse-census', 'lean-review', 'verifying-work', 'researching', 'shipping'];
+const SKILLS = ['foreman', 'reuse-census', 'ticketing', 'lean-review', 'verifying-work', 'researching', 'shipping'];
 
 const flag = (f) => process.argv.includes(f);
 if (flag('--help') || flag('-h')) {

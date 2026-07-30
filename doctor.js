@@ -9,7 +9,7 @@ const os = require('os');
 const path = require('path');
 const { execFileSync } = require('child_process');
 
-const SKILLS = ['foreman', 'reuse-census', 'lean-review', 'verifying-work', 'researching', 'shipping'];
+const SKILLS = ['foreman', 'reuse-census', 'ticketing', 'lean-review', 'verifying-work', 'researching', 'shipping'];
 const REFS = ['ladder.md', 'routes.md', 'memory.md', 'asking.md'];
 
 const project = process.argv.includes('--project');
@@ -27,7 +27,7 @@ const settingsPath = path.join(claudeDir, 'settings.json');
 //
 // DELIVERY — can Claude Code actually reach them? Two independent channels, and
 // a machine may legitimately have either. Checking payload at the delivery
-// address is what would make a plugin install look like six missing skills.
+// address is what would make a plugin install look like a pack of missing skills.
 const payloadRoot = path.join(__dirname, 'skills');
 const manifestPath = path.join(__dirname, '.claude-plugin', 'plugin.json');
 const pluginHooksPath = path.join(__dirname, 'hooks', 'hooks.json');
@@ -247,9 +247,9 @@ if (!delivered) {
   console.log('         /plugin install lazy-man-dev@lazy-man-dev');
   console.log('       → or the classic install: node install.js');
 } else if (delivered > 1) {
-  // Both channels load the same six names. Claude Code then has two skills
-  // called foreman, and which one answers is not something you control.
-  line('warn', 'installed twice — plugin AND classic; the six skills are defined twice',
+  // Both channels load the same names. Claude Code then has two skills called
+  // foreman, and which one answers is not something you control.
+  line('warn', `installed twice — plugin AND classic; all ${SKILLS.length} skills are defined twice`,
        'keep one: node install.js --uninstall   (or) /plugin uninstall lazy-man-dev');
 }
 

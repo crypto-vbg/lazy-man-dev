@@ -74,7 +74,10 @@ decisions later.
 ## How a question is phrased
 
 - **One at a time.** Wait for the answer. A batch is unanswerable and gets a
-  batch of guesses back.
+  batch of guesses back. Where the harness offers a tool that can present
+  several questions at once, this rule still wins: use it for one decision per
+  call. Its capacity is not an instruction to fill it, and a form of four
+  questions is the interrogation below wearing better formatting.
 - **Lead with the consequence, not the mechanism.** "Should users stay signed
   in after closing the browser?" beats "session cookie or JWT?" — same
   decision, but only one is answerable by someone outside the domain.

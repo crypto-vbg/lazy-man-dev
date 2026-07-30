@@ -19,8 +19,30 @@ run apart and report apart.
 
 ## 1. Pin the scope
 
-**Diff review** — the fixed point is whatever the user named: a SHA, `main`, a
-tag, `HEAD~3`. If they named none, ask.
+Three scopes. Pick the one that matches where the change actually is — asking
+for a ref when the work has never been committed is the common way this step
+goes wrong.
+
+**Working tree** — the change is uncommitted. This is what `foreman` phase 5
+always hands you, because that pack stops at the working tree by design, and it
+is what "review my changes" usually means when no ref is mentioned.
+
+```
+git diff HEAD                        # staged and unstaged, against the last commit
+git status --porcelain               # and the untracked files, which the diff misses
+```
+
+Untracked files are part of the change and `git diff` will not show them: read
+each one named in `status` output. **Ask for no ref here** — there isn't one,
+and `git diff <ref>...HEAD` would come back empty because nothing was committed.
+
+The caller may name **paths that are out of scope** — work that was already in
+the tree before this run started. Exclude them from both briefs and say in one
+line which you excluded; reviewing someone else's uncommitted work as though it
+were the change is how a clean diff collects findings it did not earn.
+
+**Diff review** — the change is committed, and the fixed point is whatever the
+user named: a SHA, `main`, a tag, `HEAD~3`.
 
 ```
 git diff <fixed-point>...HEAD        # three-dot: against the merge-base
@@ -28,10 +50,16 @@ git log <fixed-point>..HEAD --oneline
 ```
 
 Confirm the ref resolves and the diff is non-empty **before** spawning
-anything — a bad ref should fail here, not twice inside two sub-agents.
+anything — a bad ref should fail here, not twice inside two sub-agents. An
+empty diff against a valid ref usually means the work is uncommitted: switch to
+the working-tree scope rather than reporting nothing to review.
 
-**Repo audit** — no fixed point; the scope is the tree. Skip the `Correct` axis
-unless the user asked for it, and rank `Lean` findings biggest cut first.
+**Repo audit** — no change under review at all; the scope is the whole tree, and
+the user asked for a sweep rather than a review. Skip the `Correct` axis unless
+they asked for it, and rank `Lean` findings biggest cut first. Do not arrive
+here by falling back: an audit answers a different question, and reaching it
+because a ref was missing silently drops the correctness axis from a review that
+needed it.
 
 ## 2. Find what "correct" means here
 
@@ -48,8 +76,11 @@ tooling already enforces — a linter does not need a second opinion.
 
 ## 3. Spawn both axes in parallel
 
-One message, two `Agent` calls. Each sub-agent gets the diff command, the
-commit list, and its brief pasted in full — it cannot see this file.
+One message, two `Agent` calls. Each sub-agent gets the diff command, the commit
+list where one exists, any out-of-scope paths, and its brief pasted in full — it
+cannot see this file. On the working-tree scope there is no commit list; give
+the untracked file names in its place, or the agent reviews only what `git diff`
+happened to show it.
 
 ### Correct — brief
 

@@ -4,9 +4,13 @@ The constraint every build runs under. Injected into every sub-agent by
 `hooks/foreman-subagent.js`, so this file is the single source of truth — edit
 it here and the whole crew changes.
 
-Climb only *after* you understand the problem. Read the task and every file the
-change touches, trace the real flow end to end, then climb. Stop at the first
-rung that holds.
+**Rung 1 is the top of this ladder: a higher rung is a lower number and less
+code.** You start at the top and work *down*, dropping a rung only when the one
+above it genuinely fails.
+
+Do that only *after* you understand the problem. Read the task and every file
+the change touches, trace the real flow end to end, then start at rung 1 and
+stop at the first rung that holds.
 
 1. **Does this need to exist?** Speculative need → skip it, say so in one line.
 2. **Does this codebase already have it?** A helper, util, type, hook, or
@@ -20,7 +24,20 @@ rung that holds.
 6. **Can it be one line?** One line.
 7. **Only then:** the minimum code that works.
 
-Two rungs both work → take the higher one and move on.
+Two rungs both hold → take the higher one — the **lower number** — and move on.
+
+## On an empty repo
+
+Rung 2 is a search, and on a greenfield repo it comes back empty. That is an
+answer, not a failure — and it is not a licence to reach for a framework either.
+Rungs 3 to 5 carry the weight instead: the standard library, the platform, and
+whatever the manifest already installs.
+
+What changes is what you leave behind. The first implementation of anything
+becomes the pattern the next census finds, so write it plainly and put it where
+it will be looked for. One file that works beats a directory tree waiting for
+code — every empty folder, base class, and config layer added now is a guess
+about a second caller that does not exist yet.
 
 ## Root cause, not symptom
 

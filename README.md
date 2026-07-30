@@ -13,7 +13,7 @@ needed.
 /plugin install lazy-man-dev@lazy-man-dev
 ```
 
-Type those in Claude Code, then start a new session. Six skills and the
+Type those in Claude Code, then start a new session. Seven skills and the
 sub-agent hook arrive together; nothing is written to your `settings.json`.
 Prefer a clone you can edit? [Install from source](#install-from-source).
 
@@ -44,6 +44,7 @@ delegates to them when they are.
 | Ponytail's "reuse what's already here" is a reflex with no completion criterion, so it is the rung most often skipped | Phase 2 promotes it to a gated sub-agent that must return `file:symbol` evidence or an explicit "nothing exists" |
 | Bloat is scored only *after* the code exists (`net: -N lines possible`) | Phase 3 declares a file and line budget *before* the first line, and phase 5 measures against it |
 | Neither pack gates a completion *claim* — "should work" passes | Phase 5 runs `verifying-work` first: a named command, run fresh, with its exit code |
+| A spec becomes a document. Which piece runs next, and what can be fanned out inside it, is rediscovered every session | `ticketing` slices it into one-run tickets that each carry their own check and their own sub-agent fan-out, then hands you the board |
 | Sub-agents inherit no constraints — `SessionStart` context never reaches them | `hooks/foreman-subagent.js` injects the ladder into every spawn |
 
 ## Layout
@@ -65,11 +66,12 @@ lazy-man-dev/
 │   │       └── asking.md          which questions to ask, and how few
 │   ├── reuse-census/SKILL.md      looks INWARD: what this repo already has
 │   ├── researching/SKILL.md       looks OUTWARD: primary sources, version-pinned
+│   ├── ticketing/SKILL.md         spec → one-run tickets. Picks none of them
 │   ├── lean-review/SKILL.md       parallel Correct ∥ Lean review
 │   ├── verifying-work/SKILL.md    evidence gate on any completion claim
 │   └── shipping/SKILL.md          issue → branch → commit → PR. YOU type this
 ├── evals/
-│   ├── scenarios.json             25 scenarios: routing + guardrails
+│   ├── scenarios.json             34 scenarios: routing + guardrails
 │   └── README.md                  how to run and score them
 └── hooks/
     ├── foreman-subagent.js        injects the ladder into every sub-agent
@@ -77,7 +79,7 @@ lazy-man-dev/
     └── settings-snippet.json      manual wiring, if you skip the installer
 ```
 
-Five skills are model-invoked, so `foreman` reaches them and you can also call
+Six skills are model-invoked, so `foreman` reaches them and you can also call
 them by hand. **`shipping` is not** — it sets `disable-model-invocation: true`,
 which is what makes the git guardrail structural rather than a promise. No
 skill can reach it. Only you can.
@@ -141,6 +143,13 @@ work and phase 1 finds the budget, the declared check, and which files were
 already dirty before it began. Phase 6 deletes it when the `Log` entry lands, so a
 run file lying around *is* the signal that something was interrupted.
 
+Two other things share that directory and the same `*` gitignore, and neither is
+memory: `spec-<slug>.md`, what a Foggy run settled, and `tickets/<n>-<slug>.md`,
+that spec sliced into one-run pieces. A ticket's `State:` line — `open`,
+`building`, `done` — is the only record of progress there is; a second place to
+store it is a second place for it to be wrong. Unlike a run file, a `done` ticket
+is kept.
+
 **On conflict, it grills.** Memory says `main`, you say staging → it states the
 contradiction in one line, asks **one** question with a recommended answer,
 waits, then writes the answer to `Standing`. Reality outranks memory and you
@@ -179,7 +188,7 @@ answered. Full discipline in `skills/foreman/references/asking.md`.
 
 ## Install
 
-Two routes. Both deliver the same six skills and the same hook — pick one, not
+Two routes. Both deliver the same seven skills and the same hook — pick one, not
 both, or every skill ends up defined twice.
 
 | | Plugin | From source |
@@ -224,7 +233,7 @@ git clone https://github.com/crypto-vbg/lazy-man-dev.git
 node lazy-man-dev/install.js
 ```
 
-The installer links the six skills into
+The installer links the seven skills into
 `~/.claude/skills/`, wires the `SubagentStart` hook into `~/.claude/settings.json`
 (backing it up first, and preserving every key already there), then runs the
 doctor and prints a verdict.
@@ -273,7 +282,7 @@ NOT READY — 2 blocking issues.
 
 Every non-ok line prints the command that fixes it. What it actually verifies:
 
-- Each of the six skills is present, parses, and its frontmatter `name`
+- Each of the seven skills is present, parses, and its frontmatter `name`
   matches its directory — a mismatch silently breaks discovery.
 - **`shipping` still declares `disable-model-invocation: true`.** This is the
   git guardrail checked *structurally* rather than trusted. If it ever reads
@@ -281,7 +290,7 @@ Every non-ok line prints the command that fixes it. What it actually verifies:
   can ship on its own; treat it as blocking.
 - **Something actually delivers the skills to Claude Code** — the plugin, or a
   classic install, or both. Either alone passes; only neither fails. It also
-  warns when *both* are live, because then all six skills are defined twice and
+  warns when *both* are live, because then all seven skills are defined twice and
   which copy answers is not yours to decide.
 - The hook is wired, the path still resolves, the hook **executes**, and its
   payload still contains the git prohibition. A hook that runs but emits the
@@ -308,6 +317,7 @@ each with `lazy-man-dev:`, so `/lazy-man-dev:reuse-census`:
 
 - `/reuse-census` — "does this repo already do X?"
 - `/researching` — "what even *is* X, and which version applies here?"
+- `/ticketing` — turn a spec into tickets you can pick from
 - `/lean-review` — review a diff, or audit the tree for bloat
 - `/verifying-work` — "did that actually work?" on any claim, yours or an agent's
 - `/shipping` — the finished work becomes an issue, a branch, a commit, and a
@@ -317,7 +327,7 @@ each with `lazy-man-dev:`, so `/lazy-man-dev:reuse-census`:
 
 1. **Route** — read memory, pick one of six routes, post its checklist.
 2. **Recon** — census sub-agent finds what already exists; you trace the callers.
-3. **Budget** — post files, net lines, ladder rung, and the check, before
+3. **Budget** — post files, lines added, ladder rung, and the check, before
    coding; persist them so a reset context can still measure against them.
 4. **Build** — fan out on reads, stay single on writes.
 5. **Gate** — verify with a real command, then `Correct` ∥ `Lean` sub-agents;
@@ -331,14 +341,18 @@ yours: `/shipping`.
 binds. A router that ceremonies every request is the bloat this pack exists to
 prevent:
 
+Phase 1 runs on every route — it names the route and records the baseline. On
+the short routes that is one line and two git reads; the column says what
+follows it.
+
 | Route | Phases | Notes |
 |---|---|---|
-| Trivial | 4 | A typo gets no census, no budget, no two-agent review. |
-| Build | 1–6 | The full run. |
-| Broken | 1–6 | Red loop first; phase 5 adds the regression protocol. |
-| Foggy | 1–3, then 6 | Phase 3 posts a **spec** block, not a budget. Writes a spec file, no run file. Phase 6 is one `Log` entry. |
-| Judge | 5 | Review half only — nothing was built, so no verify gate and no budget to measure. |
-| Learn | 2 | Delivers a trace, not census verdicts. |
+| Trivial | 1 (one line), then 4 | A typo gets no census, no budget, no two-agent review. |
+| Build | 1–6 | The full run. Also where a settled, one-session spec lands. |
+| Broken | 1–6 | Phase 2 opens with the red loop; phase 5 adds the regression protocol. |
+| Foggy | 1–3, then 6 | Phase 3 posts a **spec** block, not a budget, then slices it into tickets and stops for you to pick. Writes a spec file and `.foreman/tickets/`, no run file. Phase 6 is one `Log` entry. |
+| Judge | 1, then 5 | Review half only — nothing was built, so no verify gate and no budget to measure. |
+| Learn | 1, then 2 | Delivers a trace, not census verdicts. |
 
 A run that **cannot** finish has its own exit: stop building, leave the tree
 alone, write the blocker into the run file, and say what you need. No `Log`
@@ -346,7 +360,7 @@ entry — memory records runs that finished.
 
 ### Check it still behaves
 
-`evals/scenarios.json` holds thirty scenarios: one per route, plus the
+`evals/scenarios.json` holds thirty-four scenarios: one per route, plus the
 failure modes that matter most — committing when it must not, *discarding
 uncommitted work* when it must not, over-routing a trivial change, and letting an
 unverified claim through. Run them by hand after any edit to a skill; see
@@ -390,10 +404,10 @@ Route:   Build
 Reuse:   src/lib/csv.ts:writeRows, src/db/orders.ts:listByUser
 Build:   the route handler
 Rung:    2 (reuse) — nothing above it applies; both halves already exist
-Budget:  2 files, ~40 net lines
+Budget:  2 files, ~40 lines added
 Check:   pytest -q tests/test_export.py
 Skipped: streaming for large exports, add when a user exceeds ~10k orders
-Excess:  none
+Waiver:  none
 ```
 
 **Phase 4 builds it. Phase 5 gates it** — first a real command, then two
@@ -424,6 +438,62 @@ Uncommitted, in the working tree. Next step is yours: /shipping
 ```
 
 **It stops there.** Nothing is committed. That last line is the handoff.
+
+### Starting from a spec you wrote
+
+A job bigger than one session does not start with code. You hand over the spec —
+your own file, not something foreman wrote:
+
+> I've written `SPEC.md` for the billing module. Let's get going.
+
+It reads the spec **before** picking a route, and routes to **Foggy**: the fog is
+already cleared, so there is nothing to interview about. What it does instead is
+reconcile — every file, symbol, and dependency the spec names gets checked
+against the repo, and a contradiction gets one line and one question rather than
+a silent assumption. Only the *holes* in the spec are asked about.
+
+Then it slices, one file per ticket in `.foreman/tickets/`:
+
+```
+Ticket:  3 — Rate-limit the export endpoint
+State:   open
+Goal:    stop one tenant's export job starving everyone else's
+Parts:   per-tenant request counter
+         429 response with Retry-After
+Fanout:  1 read agent — census the existing middleware chain, ≤100 words
+Depends: 2
+Check:   pytest -q tests/test_ratelimit.py
+Spec:    SPEC.md — "Fair use"
+Open:    none
+```
+
+Two things make that ticket worth more than a bullet on a list. It carries **its
+own check**, so it can be finished and proved without waiting for its
+neighbours — which is why the slicing is vertical, one thin working change at a
+time, never a schema ticket plus an API ticket plus a UI ticket that can only be
+verified together. And it carries **its own `Fanout:`**, spotted while something
+was holding the whole spec, so the run that builds it dispatches what is already
+named instead of rediscovering it with less context. `none — single writer` is
+the honest answer most of the time, and it is written down too.
+
+Then the board, and then it stops:
+
+```
+.foreman/tickets/ — 4 tickets, 1 done
+
+1 done      CSV writer              check: pytest -q tests/test_csv.py
+2 building  Export endpoint         depends: 1   fanout: none
+3 open      Rate-limit the export   depends: 2   fanout: 1 read
+4 open      Admin download button   depends: 2   fanout: none
+
+Pick one: say the number.
+```
+
+**You pick.** Say "do ticket 3" and that ticket *is* the Build run: its `Parts:`
+is what phase 2 censuses, its `Check:` is what phase 3 declares, its `Fanout:` is
+what phase 4 dispatches. Phase 6 flips it to `done`, reprints the board, and
+stops again — one ticket per run, and the next one is your call, not its next
+move.
 
 ### When you know the goal but not the concept
 
@@ -593,7 +663,8 @@ off in a week, and then none of the guardrails run at all.
 Borrowed deliberately, each for one thing:
 
 - [mattpocock/skills](https://github.com/mattpocock/skills) — the phase
-  pipeline, the two-axis review, the Fowler smell baseline.
+  pipeline, the two-axis review, the Fowler smell baseline, and spec → tickets →
+  *you* pick as the shape of a job too big for one session.
 - [ponytail](https://github.com/kaiviti/ponytail) — the ladder, the review
   tags, the `defer:` marker convention, the `SubagentStart` injection trick.
 - [obra/superpowers](https://github.com/obra/superpowers) — verification before
@@ -605,7 +676,7 @@ Borrowed deliberately, each for one thing:
 - [Verification loops in Claude Code](https://claude.com/blog/building-verification-loops-in-claude-code-with-skills)
   — gather → act → **verify** as a loop, not a final step.
 - [spec-kit](https://github.com/github/spec-kit) — phase gates with a
-  documented-exception slot, which is what `Excess:` is; and the finding that
+  documented-exception slot, which is what `Waiver:` is; and the finding that
   chained phases without intermediate checks compound down to roughly a third
   of their starting quality.
 - [x-skills](https://github.com/quangtran88/x-skills) — routers that classify

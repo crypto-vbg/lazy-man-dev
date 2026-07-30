@@ -4,14 +4,18 @@ Six routes. Pick one from the request's leading signal. The route decides which
 phases run — running all six phases on a typo is the exact bloat this pack
 exists to prevent.
 
+Phase 1 runs on **every** route — it is what names the route and records the
+baseline. On the short routes it is one line and two git reads, not a ceremony.
+The column below says which phases follow it.
+
 | Route | Signal | Phases | Writes code? |
 |---|---|---|---|
-| **Trivial** | A single obvious edit whose location is already known: typo, rename, config value, version bump, a fix the user has already pointed at. | 4 only | Yes |
-| **Build** | Add, extend, or refactor something that fits in one session: a feature, an endpoint, a component, a migration. | 1–6 | Yes |
-| **Broken** | Something throws, fails, regressed, flakes, or runs slow. | 1–6, with the **red loop** first | Yes |
-| **Foggy** | Too big or too vague for one session: greenfield, "should we…", a rewrite, a request with unsettled decisions inside it. | 1–3, then 6 | **No** |
-| **Judge** | "Review this", "is this over-engineered", "audit the repo", "what can we delete". | 5 only | **No** |
-| **Learn** | "How does X work", "where does Y live", "what calls Z" — and "what even *is* X", when the concept is new to the user. | 2 only | **No** |
+| **Trivial** | A single obvious edit whose location is already known: typo, rename, config value, version bump, a fix the user has already pointed at. | 1 (one line), then 4 | Yes |
+| **Build** | Add, extend, or refactor something that fits in one session: a feature, an endpoint, a component, a migration. Also a **settled spec that fits one session**. | 1–6 | Yes |
+| **Broken** | Something throws, fails, regressed, flakes, or runs slow. | 1–6; phase 2 opens with the **red loop** | Yes |
+| **Foggy** | Too big or too vague for one session: greenfield, "should we…", a rewrite, a request with unsettled decisions inside it, **or a spec that is bigger than one session or still has a decision open**. | 1–3, then 6 | **No** |
+| **Judge** | "Review this", "is this over-engineered", "audit the repo", "what can we delete". | 1, then 5 | **No** |
+| **Learn** | "How does X work", "where does Y live", "what calls Z" — and "what even *is* X", when the concept is new to the user. | 1, then 2 | **No** |
 
 ## Route rules
 
@@ -20,23 +24,56 @@ change stays inside one file and the ladder's root-cause check finds no sibling
 callers. The moment either breaks, promote to **Build** and start at phase 1 —
 say so in one line when you do.
 
-**Broken earns its own opening move.** Before theorising, get one command that
-already goes **red** on this bug. No red loop, no diagnosis — a fix you cannot
-watch turn green is a guess. Phase 5's gate is the regression test that keeps
-it green.
+**A promoted run keeps the baseline it started with.** Trivial has usually
+edited something by the time it promotes, and re-recording `git status` now
+would file your own edit as pre-existing dirt — phase 5 would then subtract your
+work out of its own measurement. This is why phase 1 records the baseline on
+every route including Trivial: on promotion you already have it, and you reuse
+it rather than taking a fresh one.
 
-**Foggy does not build.** The deliverable is a settled understanding: the
-decisions named, settled, and written down as a spec or a set of tickets.
+**Broken earns its own opening move, and it lives in phase 2.** Before
+theorising, get one command that already goes **red** on this bug. No red loop,
+no diagnosis — a fix you cannot watch turn green is a guess. It runs before the
+census, because a census aimed at an unreproduced symptom searches for the wrong
+thing; phase 3 records the command on the `Red:` line, and phase 5 re-runs it as
+the regression protocol. If the bug cannot be reproduced from here — it needs
+production data, a device, a credential you do not have — that is a blocker, so
+take the "Stopping early" path rather than proceeding without the loop.
+
+**Foggy does not build.** The deliverable is work the user can start: the
+decisions named and settled as a spec, and the spec sliced into tickets.
 Interview by [`asking.md`](asking.md) — sort the decisions, ask only the
 load-bearing ones, default the rest. Three questions is the budget.
+
+**A spec the user wrote lands here only when it is too big for one run.** Route
+it by what it *is*, not by the fact that it arrived as a document:
+
+- **Settled, and fits one session** → **Build**, not here. It is a ticket that
+  turned up without a board: phase 2 censuses its parts, phase 3 budgets it,
+  phase 4 builds it. Slicing a one-session spec into a ticket set is ceremony
+  that delays the code the user came for.
+- **Bigger than one session, or still holding an open decision** → **Foggy**.
+  One unsettled decision is enough on its own, however small the spec: a ticket
+  that encodes a guess is worse than a question.
+
+For the specs that do land here, the opening move changes. The fog they came to
+clear is already cleared: the interview is mostly derivation, not questioning,
+and asking about what the spec settles is the most annoying failure in
+[`asking.md`](asking.md) wearing a different hat. Read it, reconcile it against
+the repo, ask only about the holes — then go straight to slicing.
 
 **Persist the spec before you stop.** A fresh context discards the interview, so
 the agreement has to live somewhere durable or it does not survive the break.
 Write it to `.foreman/spec-<slug>.md` — the same directory as memory, so the `*`
 in `.foreman/.gitignore` already covers it (create that file if it is absent).
-Where `to-tickets` is installed and the spec became GitHub issues, those are the
-durable record instead — say which you wrote. A spec that lives only in the chat
-is lost the moment the context resets.
+A spec that lives only in the chat is lost the moment the context resets. When
+the spec is the user's own file, do not copy it: cite its path in the tickets and
+write only what the interview added.
+
+**Then slice, post the board, and stop.** `ticketing` turns the spec into
+`.foreman/tickets/<n>-<slug>.md`, one per ticket, each sized to one Build run and
+each naming the sub-agent fan-out it contains. **The pick is the user's** — a
+route that writes no code does not get to choose which code gets written first.
 
 The spec is the *only* file a Foggy run leaves. It writes no `run-<slug>.md`:
 that file means a build is in flight, and a Foggy run has finished, not paused.
@@ -50,10 +87,14 @@ Read it first. Where it contradicts what was just agreed, grill by
 ask one question — before rewriting anything. Silently replacing a spec discards
 a decision the user already made, and they will not know it happened.
 
-When the fog clears, re-enter at phase 1 on the **Build** route with a fresh
-context and point it at that spec. Phase 1 reads it as it reads memory; it is
-the parts list phase 2 censuses against and the yardstick phase 5 checks for
-drift.
+**A picked ticket is a Build run.** When the user names one, re-enter at phase 1
+on the **Build** route with a fresh context and point it at that ticket file —
+phase 1 reads it as it reads memory, and it has already done phase 2's and
+phase 3's homework.
+
+One ticket per run. Two tickets in one run share a budget, a gate, and a diff,
+which is three ways for the second to hide inside the first — and the user picked
+one.
 
 **Research before you interview.** Two kinds of fog look identical at first and
 need opposite moves. *Undecided* fog — the user knows the domain and has not
@@ -105,7 +146,8 @@ inline instead.
 | Phase | Runs inline by default; delegate only if this is already installed |
 |---|---|
 | Foggy interview | `grilling`, `grill-with-docs` |
-| Foggy → spec → tickets | `to-spec`, `to-tickets`, `wayfinder` for multi-session fog |
+| Foggy → spec | `to-spec`; `wayfinder` for multi-session fog |
+| Foggy → tickets | `ticketing` ships in this pack — nothing to install |
 | Broken, phase 1 | `diagnosing-bugs` |
 | Build, phase 4 | `implement`, `tdd` |
 | Gate, correctness axis | `code-review` |

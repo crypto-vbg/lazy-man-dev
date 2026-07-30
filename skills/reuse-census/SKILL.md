@@ -70,3 +70,10 @@ carries a path. A census whose report contains no file paths has not run.
 Prefer `none` to a stretch. A false reuse — bending an unrelated helper to fit
 — costs more than the duplicate would have, because now two callers constrain
 one function that was only ever designed for one.
+
+**Every part `none` is a complete census, not an empty one.** On a new or nearly
+empty repo that is the correct report — say so plainly rather than padding it
+with near-misses. The manifest is still worth reading, because an installed
+dependency outranks anything hand-written even on day one, and where there is
+genuinely no convention yet, close with `house style: none — greenfield` and
+stop.

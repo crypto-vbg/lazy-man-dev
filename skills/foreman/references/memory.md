@@ -17,17 +17,64 @@ without editing the project's own `.gitignore`.
 
 Memory is working state, not a deliverable. It is never committed.
 
-The same directory also holds two other kinds of working state, both covered by
-the same `*` gitignore, and neither of them is memory:
+The same directory also holds three other kinds of working state, all covered by
+the same `*` gitignore, and none of them is memory:
 
 - `spec-<slug>.md` — what a Foggy run settled (see [`routes.md`](routes.md)).
   The Build route reads it on re-entry.
-- `run-<slug>.md` — the live run: phase 3's budget block plus phase 1's
-  `git status --porcelain` baseline. Only the routes that write code create one
-  (Build, Broken); it exists while that run is in flight and phase 6 deletes it.
-  A run that stopped early keeps its file, with the blocker written into it.
+- `tickets/<n>-<slug>.md` — the spec sliced into one-run pieces, written by
+  `ticketing`. Each carries its own `State:` line, and that line is the only
+  record of progress: `open`, `building`, `done`. A `done` ticket outlives the run
+  that built it, so unlike a run file it is not deleted.
+- `run-<slug>.md` — the live run: phase 3's budget block plus phase 1's baseline,
+  which is both the `git status --porcelain` file list **and** the
+  `git diff --numstat` line counts. Phase 5 subtracts the numbers, so a baseline
+  recorded as names alone cannot attribute a file that was already dirty before
+  you edited it. Only the routes that write code create one (Build, Broken); it
+  exists while that run is in flight and phase 6 deletes it. A run that stopped
+  early keeps its file, with the blocker written into it.
 
-Neither is a deliverable, and neither is committed.
+None of them is a deliverable, and none is committed.
+
+## The baseline, and how phase 5 measures against it
+
+Phase 1 records the starting point; phase 5 subtracts it. Both halves live here
+because both are about the run file, and half a baseline measures nothing.
+
+**Phase 1 records two things**, on every route including Trivial — a promotion
+to Build is only measurable if the baseline predates the first edit:
+
+```
+git status --porcelain     # which files were already dirty, tracked or not
+git diff --numstat         # how many lines of that dirt sit in tracked files
+```
+
+Names alone are not enough. The common case is a file that was **already dirty
+and that you then edit**, and nothing but the `--numstat` figures can separate
+your lines from the ones that were there when you arrived.
+
+**Phase 5 runs `git diff --numstat` again and subtracts, file by file:**
+
+| At baseline | At phase 5 | Yours? |
+|---|---|---|
+| Dirty, tracked | Edited by you | This run's numbers **minus** the baseline's |
+| Untracked | Anything | **None of it**, whatever it now holds |
+| Absent | Present | **All of it** |
+
+Compare the **added** lines against the budget, which phase 3 declared in added
+lines: deletions are reported beside that figure and never netted into it. A
+refactor that deletes 200 and adds 180 has spent 180, not −20.
+
+**Authored lines only.** Anything phase 3 set aside on its `Generated:` line —
+lockfiles, generated clients, migration scaffolds, snapshot updates, formatter
+churn — is reported as a second figure beside the authored one, never folded in.
+Folding makes the number meaningless in both directions: a dependency bump blows
+a budget it never spent, and 4,000 machine-written lines are a good place to
+hide 200 hand-written ones. Set aside is not exempt from *review* — the line
+that regenerated it was yours.
+
+Where the baseline is gone — a context that reset with no run file — the figure
+is **unverifiable**. Say that rather than quoting a number you cannot attribute.
 
 ## Standing — durable answers, asked once
 
@@ -61,7 +108,8 @@ Newest last, one entry per completed run:
 
 ```markdown
 ## 2026-07-25 — CSV export endpoint
-route:    Build | budget: 2 files ~40 lines | actual: +37/-4
+route:    Build | budget: 2 files ~40 lines added | actual: +37/-4
+ticket:   2 — Export endpoint (3 of 4 done)
 verified: pytest -q tests/test_export.py → exit 0
 reused:   src/lib/csv.ts:writeRows
 shipped:  issue #42, branch 42-csv-export, PR #43 → main
