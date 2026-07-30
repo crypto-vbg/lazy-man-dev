@@ -195,7 +195,7 @@ both, or every skill ends up defined twice.
 |---|---|---|
 | Install | `/plugin marketplace add crypto-vbg/lazy-man-dev` then `/plugin install lazy-man-dev@lazy-man-dev` | `git clone` + `node install.js` |
 | Your `settings.json` | untouched | hook wired in, backed up first |
-| Update | `/plugin marketplace update` | `git pull` |
+| Update | `/plugin marketplace update lazy-man-dev` then `/reload-plugins` | `git pull` |
 | Uninstall | `/plugin uninstall lazy-man-dev` | `node install.js --uninstall` |
 | Editing a skill | needs a reinstall | immediate — it is a link |
 | Skill names | `/lazy-man-dev:foreman` | `/foreman` |
@@ -222,6 +222,29 @@ to be written into your settings.
 Plugin skills are namespaced — `/lazy-man-dev:shipping`, not `/shipping`.
 Automatic invocation is unaffected; foreman still routes and dispatches on its
 own. Only what *you* type changes.
+
+**Turn auto-update on once, or you will not hear about new versions.** Claude
+Code ships it *disabled* for third-party marketplaces, and the update notice is
+a consequence of an update happening — no auto-update, no refresh, no notice, so
+a stale install stays stale silently:
+
+```
+/plugin  →  Marketplaces  →  lazy-man-dev  →  Enable auto-update
+```
+
+It then refreshes shortly after a session starts and prompts you to run
+`/reload-plugins`. Leaving it off is fine as long as you run the update row
+above by hand now and then; what does not work is waiting to be told.
+
+To update by hand:
+
+```
+/plugin marketplace update lazy-man-dev
+/reload-plugins
+```
+
+`/reload-plugins` on its own only reloads what is already on disk — it never
+re-fetches the marketplace, so it cannot pull a version you do not have yet.
 
 ### Install from source
 
